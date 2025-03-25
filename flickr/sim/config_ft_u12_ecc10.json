@@ -1,0 +1,26 @@
+{
+    "common" : {
+	"ecc" : 10,
+        "bpf" : 1,
+        "nfreqs" : 1,
+        "seed" : 1,
+        "jpeg_quality" : 75
+    },
+    "wedge" : { 
+	"message"   : "/opt/projects/RACE/twosix/flickr/decl.txt",
+	"cache_dir" : "./cache",
+	"output"    : "/tmp/to_flickr.mp4"
+    },
+    "unwedge" : {
+	"steg"    : "/tmp/from_flickr.mp4",
+	"message" : "/tmp/from_flickr.txt"
+    },
+    "transport" : {
+	"command" : [ "../../sri-race-plugins/source/flickr_transport/ft",
+                      "../../sri-race-plugins/source/flickr_transport/flickr_auth/user1.ini",
+		      "/tmp/to_flickr.mp4",
+                      "../../sri-race-plugins/source/flickr_transport/flickr_auth/user2.ini",
+		      "/tmp/from_flickr.mp4"
+		    ]
+    }
+}

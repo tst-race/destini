@@ -1,0 +1,20 @@
+{
+    "common" : {
+        "bpf" : 1,
+        "nfreqs" : 1,
+        "seed" : 1,
+        "jpeg_quality" : 75
+    },
+    "wedge" : { 
+	"message"   : "/opt/projects/RACE/twosix/flickr/decl.txt",
+	"cache_dir" : "./cache",
+	"output"    : "/tmp/to_flickr.mp4"
+    },
+    "unwedge" : {
+	"steg"    : "/tmp/from_flickr.mp4",
+	"message" : "/tmp/from_flickr.txt"
+    },
+    "transport" : {
+	"command" : [ "cp", "/tmp/to_flickr.mp4", "/tmp/from_flickr.mp4" ]
+    }
+}

@@ -1,0 +1,469 @@
+#include "Link.h"
+
+#include <ITransportSdk.h>
+#include <base64.h>
+
+#include <chrono>
+#include <nlohmann/json.hpp>
+
+#include "PersistentStorageHelpers.h"
+#include "curlwrap.h"
+
+#include <log.h>
+
+#define TRACE_SRI_METHOD(...) TRACE_METHOD_BASE(PluginTA2SRIFlickr, ##__VA_ARGS__)
+#define TRACE_SRI_FUNCTION(...) TRACE_FUNCTION_BASE(PluginTA2SRIFlickr, ##__VA_ARGS__)
+
+#define DEFAULT_TAGS "frob128818ee,anachron229189899"
+#define WORDLIST "/etc/race/wordlist.txt"
+
+#include "flickr_transport.h"
+
+#define OLD_CODE 0
+
+static const size_t ACTION_QUEUE_MAX_CAPACITY = 10;
+
+extern std::string getCurrentTags2(long);
+
+namespace std {
+static std::ostream &operator<<(std::ostream &out, const std::vector<RaceHandle> &handles) {
+    return out << nlohmann::json(handles).dump();
+}
+}  // namespace std
+
+//Link::Link(LinkID linkId, LinkAddress address, LinkProperties properties, ITransportSdk *sdk, const DynamicWords& dw) :
+Link::Link(LinkID linkId, LinkAddress address, LinkProperties properties, ITransportSdk *sdk) :
+  //    dynamic_words(dw),
+    sdk(sdk),
+    linkId(std::move(linkId)),
+    address(std::move(address)),
+    properties(std::move(properties))
+{
+    logDebug("FlickrLink: in Link::Link");
+    this->properties.linkAddress = nlohmann::json(this->address).dump();
+}
+
+Link::~Link() {
+    TRACE_SRI_METHOD(linkId);
+    shutdown();
+}
+
+LinkID Link::getId() const {
+    return linkId;
+}
+
+const LinkProperties &Link::getProperties() const {
+    return properties;
+}
+
+ComponentStatus Link::enqueueContent(uint64_t actionId, const std::vector<uint8_t> &content) {
+    TRACE_SRI_METHOD(linkId, actionId);
+    logDebug("FlickrLink: in enqueueContent");
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        contentQueue[actionId] = content;
+    }
+    logDebug("FlickrLink: returning from enqueueContent");
+    return COMPONENT_OK;
+}
+
+ComponentStatus Link::dequeueContent(uint64_t actionId) {
+    TRACE_SRI_METHOD(linkId, actionId);
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        auto iter = contentQueue.find(actionId);
+        if (iter != contentQueue.end()) {
+            contentQueue.erase(iter);
+        }
+    }
+    return COMPONENT_OK;
+}
+
+ComponentStatus Link::fetch(std::vector<RaceHandle> handles) {
+    TRACE_SRI_METHOD(linkId, handles);
+    logDebug("FlickrLink: In fetch");
+
+
+    if (isShutdown) {
+        logError(logPrefix + "link has been shutdown: " + linkId);
+        return COMPONENT_ERROR;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    if (actionQueue.size() >= ACTION_QUEUE_MAX_CAPACITY) {
+        logError(logPrefix + "action queue full for link: " + linkId);
+        return COMPONENT_ERROR;
+    }
+
+    actionQueue.push_back({false, std::move(handles), 0});
+    conditionVariable.notify_one();
+    return COMPONENT_OK;
+}
+
+ComponentStatus Link::post(std::vector<RaceHandle> handles, uint64_t actionId) {
+    TRACE_SRI_METHOD(linkId, handles, actionId);
+
+    logDebug("FlickrLink: In post");
+    if (isShutdown) {
+        logError(logPrefix + "link has been shutdown: " + linkId);
+        return COMPONENT_ERROR;
+    }
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    logDebug("FlickrLink: In post checking action queue capacity");
+    if (actionQueue.size() >= ACTION_QUEUE_MAX_CAPACITY) {
+        logError(logPrefix + "action queue full for link: " + linkId);
+        return COMPONENT_ERROR;
+    }
+
+    logDebug("FlickrLink: In post checking queue");
+    if (contentQueue.find(actionId) == contentQueue.end()) {
+        // TODO: what's the correct log level. We want it to be an error(?) for performer encodings,
+        // but this is expected for our own ta2.
+        logInfo(logPrefix + "no enqueued content for given action ID: " + std::to_string(actionId));
+        updatePackageStatus(handles, PACKAGE_FAILED_GENERIC);
+        return COMPONENT_OK;
+    }
+    
+    logDebug("FlickrLink: In post queue pushback");
+    actionQueue.push_back({true, std::move(handles), actionId});
+    logDebug("FlickrLink: In post notify_one");
+    conditionVariable.notify_one();
+    return COMPONENT_OK;
+}
+
+void Link::start() {
+    TRACE_SRI_METHOD(linkId);
+    logDebug(logPrefix + " Link::start invokes runActionThread");
+
+    thread = std::thread(&Link::runActionThread, this);
+}
+
+void Link::shutdown() {
+    TRACE_SRI_METHOD(linkId);
+    isShutdown = true;
+    conditionVariable.notify_one();
+    if (thread.joinable()) {
+        thread.join();
+    }
+}
+
+void Link::runActionThread() {
+    TRACE_SRI_METHOD(linkId);
+    logPrefix += linkId + ": ";
+    logDebug(logPrefix + " starting runActionThread");
+
+    int latest = getInitialIndex();
+
+    while (not isShutdown) {
+        std::unique_lock<std::mutex> lock(mutex);
+        conditionVariable.wait(lock, [this] { return isShutdown or not actionQueue.empty(); });
+	logDebug(logPrefix + " runActionThread in while loop");
+	  
+        if (isShutdown) {
+            logDebug(logPrefix + "shutting down");
+            break;
+        }
+
+        auto action = actionQueue.front();
+        actionQueue.pop_front();
+
+        if (action.post) {
+	  logDebug(logPrefix + " runActionThread calling postOnActionThread");
+	  postOnActionThread(action.handles, action.actionId);
+        } else {
+            latest = fetchOnActionThread(latest);
+        }
+    }
+    logDebug(logPrefix + " shutting down runActionThread");
+
+}
+
+int Link::getInitialIndex() {
+    TRACE_SRI_METHOD(linkId);
+    logPrefix += linkId + ": ";
+
+    // TODO check link hints for timestamp
+    double timestamp = psh::readValue(sdk, prependIdentifier("lastTimestamp"), -1.0);
+    if (timestamp > 0) {
+        logDebug(logPrefix + "using last recorded timestamp: " + std::to_string(timestamp));
+    } else if (address.timestamp <= 0) {
+        std::chrono::duration<double> sinceEpoch =
+            std::chrono::high_resolution_clock::now().time_since_epoch();
+        timestamp = sinceEpoch.count();
+        logDebug(logPrefix + "using now for timestamp: " + std::to_string(timestamp));
+    } else {
+        timestamp = address.timestamp;
+        logDebug(logPrefix + "using address timestamp: " + std::to_string(timestamp));
+    }
+
+    return getIndexFromTimestamp(timestamp);
+}
+
+
+int Link::fetchOnActionThread(int latestIndex) {
+    TRACE_SRI_METHOD(linkId, latestIndex);
+    logPrefix += linkId + ": ";
+
+    try {
+        auto [posts, newLatestIndex, serverTimestamp] = getNewPosts(latestIndex);
+
+        int numPosts = static_cast<int>(posts.size());
+        if (numPosts < newLatestIndex - latestIndex) {
+            logError(logPrefix + "expected " + std::to_string(newLatestIndex - latestIndex) +
+                     " posts, but only got " + std::to_string(numPosts) + ". " +
+                     std::to_string(newLatestIndex - latestIndex - numPosts) +
+                     " posts may have been lost.");
+        }
+
+	// Message has already been retrieved and placed on the
+	// "incoming" queue.  I think.  -CC
+        for (const auto &post : posts) {
+            if (postedMessageHashes.findAndRemoveMessage(post)) {
+                logDebug(logPrefix + "received post from self, ignoring");
+            } else {
+                logDebug(logPrefix + "received encrypted package");
+                std::vector<uint8_t> message = base64::decode(post);
+                sdk->onReceive(linkId, {linkId, "*/*", false, {}}, message);
+            }
+        }
+
+        if (numPosts > 0) {
+            psh::saveValue(sdk, prependIdentifier("lastTimestamp"), serverTimestamp);
+        }
+
+        fetchAttempts = 0;
+
+        return newLatestIndex;
+    } catch (curl_exception &error) {
+        logError(logPrefix + "curl exception: " + std::string(error.what()));
+    } catch (nlohmann::json::exception &error) {
+        logError(logPrefix + "json exception: " + std::string(error.what()));
+    } catch (std::exception &error) {
+        logError(logPrefix + "std exception: " + std::string(error.what()));
+    }
+
+    ++fetchAttempts;
+    if (fetchAttempts >= address.maxTries) {
+        logError(logPrefix + "Retry limit reached. Giving up.");
+        sdk->updateState(COMPONENT_STATE_FAILED);
+    }
+
+    return latestIndex;
+}
+
+/**
+ * @brief callback function required by libcurl-dev.
+ * See documentation in link below:
+ * https://curl.haxx.se/libcurl/c/libcurl-tutorial.html
+ */
+#if 0
+static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp) {
+    (static_cast<std::string *>(userp))->append(static_cast<char *>(contents), size * nmemb);
+    return size * nmemb;
+}
+#endif
+
+int Link::getIndexFromTimestamp(double secondsSinceEpoch) {
+    TRACE_SRI_METHOD(linkId, secondsSinceEpoch);
+    logPrefix += linkId + ": ";
+    logDebug(logPrefix + "in Link:getIndexFromTimestamp");
+
+    logDebug(logPrefix + "in Link:getIndexFromTimestamp, avoiding curl and returning 0.");
+    int index = 0;
+    return index;
+
+#if 0
+    std::string url = "http://" + address.hostname + ":" + std::to_string(address.port) +
+                      "/after/" + address.hashtag + "/" + std::to_string(secondsSinceEpoch);
+
+    // return 0 if error
+    int index = 0;
+    try {
+        CurlWrap curl;
+        std::string response;
+
+        logDebug(logPrefix + "Attempting to get post by timestamp from: " + url);
+
+        curl.setopt(CURLOPT_URL, url.c_str());
+        curl.setopt(CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl.setopt(CURLOPT_WRITEDATA, &response);
+        curl.perform();
+
+        index = nlohmann::json::parse(response).at("index").get<int>();
+        logDebug(logPrefix + "Got index: " + std::to_string(index));
+
+    } catch (curl_exception &error) {
+        logError(logPrefix + "curl exception: " + std::string(error.what()));
+    } catch (nlohmann::json::exception &error) {
+        logError(logPrefix + "json exception: " + std::string(error.what()));
+    } catch (std::exception &error) {
+        logError(logPrefix + "std exception: " + std::string(error.what()));
+    }
+
+    return index;
+#endif
+}
+
+// ================================================================================
+//
+// Possible flickr_download() point.  Retrieves a message from the
+// whiteboard and places it on an "incoming" queue:
+
+std::tuple<std::vector<std::string>, int, double> Link::getNewPosts(int latestIndex) {
+    std::thread::id threadID = thread.get_id();
+    TRACE_SRI_METHOD(linkId, latestIndex);
+    logPrefix += linkId + ": ";
+    std::vector<std::string> v;
+    std::vector<std::string> r;
+
+    int i;
+    logInfo(logPrefix + "in getNewPosts, processing index " + std::to_string(latestIndex));
+
+#if 0
+    const char *tags = DEFAULT_TAGS;
+#else
+    std::string out = getCurrentTags2(0);
+    std::string out1 = getCurrentTags2(-1);
+    std::string out2 = getCurrentTags2(-2);
+    
+    std::cout << "Dynamic tags: " << out << "\n";
+    std::cout << "Dynamic tags: " << out1 << "\n";
+    std::cout << "Dynamic tags: " << out2 << "\n";
+
+    const char *tags  = out.c_str();
+    const char *tags1 = out1.c_str();
+    const char *tags2 = out2.c_str();
+#endif
+    
+    logInfo(logPrefix + "in getNewPosts taglist = " + tags);
+    const char *user = address.user.c_str();
+
+    // Modify this call to extract the user - Can we allow
+    // getFlickrPost64 to take a user arg?  address.user or parse
+    // address.hashtag?  Also, DEFAULT_TAGS needs to be a DynamicWords
+    // tag list:
+
+    logInfo(logPrefix + "in getNewPosts, selected user is " + address.user);
+    logInfo(logPrefix + "in getNewPosts, tags list is " + tags);
+
+    // Beware of massive memory leaks until I get around to recovery:
+    //    std::unique_lock<std::mutex> lock(mutex);
+    std::cout << "getNewPosts" << logPrefix << "in getNewPosts =================================  Thread: " << threadID << "\n";
+
+    // Now collect posts that correspond to the three tags lists -
+    // this will cover a 30-minute period:
+    
+    char **resp = getFlickrPost64(latestIndex, user, tags);
+    //    lock.unlock();
+
+    int k = 0;
+    for (i = 0; resp[i]; i++) {
+      std::string s = std::string(resp[i]);
+      v.push_back(s);
+      k++;
+    }
+      
+    resp = getFlickrPost64(latestIndex, user, tags1);
+    //    lock.unlock();
+
+    for (i = 0; resp[i]; i++) {
+      std::string s = std::string(resp[i]);
+      v.push_back(s);
+      k++;
+    }
+
+    resp = getFlickrPost64(latestIndex, user, tags2);
+    //    lock.unlock();
+
+    for (i = 0; resp[i]; i++) {
+      std::string s = std::string(resp[i]);
+      v.push_back(s);
+      k++;
+    }
+
+    std::cout << "getNewPosts" << logPrefix << "Returning from getNewPosts\n";
+    
+    return {v, k, 0};
+}
+
+
+
+void Link::postOnActionThread(const std::vector<RaceHandle> &handles, uint64_t actionId) {
+    TRACE_SRI_METHOD(linkId, handles, actionId);
+    logPrefix += linkId + ": ";
+    logDebug(logPrefix + "in postOnActionThread");
+
+    auto iter = contentQueue.find(actionId);
+    if (iter == contentQueue.end()) {
+        // We really shouldn't get here, since we already check for this before queueing the action,
+        // but just in case...
+        logError(logPrefix +
+                 "no enqueued content for given action ID: " + std::to_string(actionId));
+        updatePackageStatus(handles, PACKAGE_FAILED_GENERIC);
+        return;
+    }
+
+    std::string message = base64::encode(iter->second);
+    auto msgHash = postedMessageHashes.addMessage(message);
+
+    int tries = 0;
+    for (; tries < address.maxTries; ++tries) {
+        if (postToWhiteboard(message)) {
+	    logInfo(logPrefix + "===  postToWhiteboard successful! ! !");
+            break;
+        }
+    }
+
+    if (tries == address.maxTries) {
+        logError(logPrefix + "retry limit exceeded: post failed");
+        postedMessageHashes.removeHash(msgHash);
+        updatePackageStatus(handles, PACKAGE_FAILED_GENERIC);
+    } else {
+        updatePackageStatus(handles, PACKAGE_SENT);
+    }
+    logInfo(logPrefix + "postOnActionThread exiting...");
+}
+
+void Link::updatePackageStatus(const std::vector<RaceHandle> &handles, PackageStatus status) {
+    for (auto &handle : handles) {
+        sdk->onPackageStatusChanged(handle, status);
+    }
+}
+
+// ================================================================================
+// POSTING - 
+// Possible model: Incorporate authentication and flickr_upload and
+// apply that here.  The message needs to be embedded.
+bool Link::postToWhiteboard(const std::string &message) {
+  //    std::thread::id threadID = thread.get_id();
+    TRACE_SRI_METHOD(linkId);
+    logPrefix += linkId + ": ";
+    bool success = false;
+
+    std::string tagstring = getCurrentTags2(0);
+    const char *tags = tagstring.c_str();
+
+    logDebug(logPrefix + "in postToWhiteboard, about to call putFlickrPost");
+
+    // #if OLD_CODE - see Link.cpp for the old code.  As above with
+    // getNewPosts, we want to pass address.user to the Flickr API for
+    // authentication:
+    logInfo(logPrefix + "in postToWhiteboard, selected user is " + address.user);
+    logInfo(logPrefix + "in postToWhiteboard, tags list is " + tags);
+
+    // std::unique_lock<std::mutex> lock(mutex);
+    // std::cout << "postToWhiteboard" << logPrefix << "in postToWhiteboard =================================  Thread: " << threadID << "\n";
+    success = putFlickrPost(message.c_str(), address.user.c_str(), tags);
+    // lock.unlock();
+
+    logDebug(logPrefix + "in postToWhiteboard, putFlickrPost returns" + std::to_string(success));
+    return success;
+}
+
+std::string Link::prependIdentifier(const std::string &key) {
+    return key + ":" + address.hostname + ":" + std::to_string(address.port) + ":" +
+           address.hashtag;
+}

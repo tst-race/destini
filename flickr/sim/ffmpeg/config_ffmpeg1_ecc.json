@@ -1,0 +1,30 @@
+{
+    "common" : {
+	"ecc" : 10,
+        "bpf" : 1,
+        "nfreqs" : 1,
+        "seed" : 1,
+        "jpeg_quality" : 75
+    },
+    "transport" : {
+	"command" : [ "ffmpeg",
+		      "-i", "/tmp/to_flickr.mp4",
+		      "-y",
+		      "-c:v", "libx264",
+		      "-g", "15",
+		      "-pix_fmt", "yuvj420p",
+		      "-strict", "-2",
+		      "-crf", "21",
+		      "/tmp/from_flickr.mp4"
+		    ]
+    },
+    "wedge" : { 
+	"message"   : "/opt/projects/RACE/twosix/flickr/decl.txt",
+	"cache_dir" : "./cache",
+	"output"    : "/tmp/to_flickr.mp4"
+    },
+    "unwedge" : {
+	"steg"    : "/tmp/from_flickr.mp4",
+	"message" : "/tmp/from_flickr.txt"
+    }
+}

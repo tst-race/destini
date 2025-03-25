@@ -1,0 +1,20 @@
+{
+    "android_path": "/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/scripts/jel2_Pixelfed_codec_android.sh",
+    "path": "/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/scripts/jel2_decomposed_codec_p3.sh",
+
+    "args": {
+        "common": "-seed <secret> -bpf 1 -nfreqs 1 -maxfreqs 6",
+        "encode": "<coverfile>"
+    },
+
+    "media": {
+        "capacities": "/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/sri-ta2/covers/jpeg/capacities.txt",
+        "maximum": 3000
+    },
+
+    "initCommand": "/bin/bash -c /etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/scripts/initialize_jel2.sh",
+
+    ".format": "Decomposed-TA2",
+    "mime-type": "image/jpeg",
+    "encodingTime": 0.5
+}

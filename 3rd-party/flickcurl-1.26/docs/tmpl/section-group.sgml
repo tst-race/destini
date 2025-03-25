@@ -1,0 +1,252 @@
+<!-- ##### SECTION Title ##### -->
+Groups
+
+<!-- ##### SECTION Short_Description ##### -->
+Groups of users.
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Groups of users.
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### STRUCT flickcurl_group ##### -->
+<para>
+
+</para>
+
+@nsid: 
+@name: 
+@description: 
+@lang: 
+@is_admin: 
+@is_pool_moderated: 
+@is_eighteenplus: 
+@privacy: 
+@photos: 
+@iconserver: 
+@members: 
+@throttle_count: 
+@throttle_mode: 
+@throttle_remaining: 
+@iconfarm: 
+@is_moderator: 
+@is_member: 
+@rules: 
+@pool_count: 
+@topic_count: 
+@photos_ok: 
+@videos_ok: 
+@images_ok: 
+@screens_ok: 
+@art_ok: 
+@safe_ok: 
+@moderate_ok: 
+@restricted_ok: 
+@has_geo: 
+
+<!-- ##### FUNCTION flickcurl_free_group ##### -->
+<para>
+
+</para>
+
+@group: 
+
+
+<!-- ##### FUNCTION flickcurl_free_groups ##### -->
+<para>
+
+</para>
+
+@groups_object: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_browse ##### -->
+<para>
+
+</para>
+
+@fc: 
+@cat_id: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_getInfo ##### -->
+<para>
+
+</para>
+
+@fc: 
+@group_id: 
+@lang: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_join ##### -->
+<para>
+
+</para>
+
+@fc: 
+@group_id: 
+@accept_rules: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_joinRequest ##### -->
+<para>
+
+</para>
+
+@fc: 
+@group_id: 
+@message: 
+@accept_rules: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_leave ##### -->
+<para>
+
+</para>
+
+@fc: 
+@group_id: 
+@delete_photos: 
+@Returns: 
+
+
+<!-- ##### STRUCT flickcurl_member ##### -->
+<para>
+
+</para>
+
+@nsid: 
+@username: 
+@iconserver: 
+@iconfarm: 
+@member_type: 
+
+<!-- ##### FUNCTION flickcurl_free_member ##### -->
+<para>
+
+</para>
+
+@member_object: 
+
+
+<!-- ##### FUNCTION flickcurl_free_members ##### -->
+<para>
+
+</para>
+
+@members_object: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_members_getList ##### -->
+<para>
+
+</para>
+
+@fc: 
+@group_id: 
+@membertypes: 
+@per_page: 
+@page: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_pools_add ##### -->
+<para>
+
+</para>
+
+@fc: 
+@photo_id: 
+@group_id: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_pools_getContext ##### -->
+<para>
+
+</para>
+
+@fc: 
+@photo_id: 
+@group_id: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_pools_getGroups ##### -->
+<para>
+
+</para>
+
+@fc: 
+@page: 
+@per_page: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_pools_getPhotos ##### -->
+<para>
+
+</para>
+
+@fc: 
+@group_id: 
+@tags: 
+@user_id: 
+@extras: 
+@per_page: 
+@page: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_pools_getPhotos_params ##### -->
+<para>
+
+</para>
+
+@fc: 
+@group_id: 
+@tags: 
+@user_id: 
+@list_params: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_pools_remove ##### -->
+<para>
+
+</para>
+
+@fc: 
+@photo_id: 
+@group_id: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_groups_search ##### -->
+<para>
+
+</para>
+
+@fc: 
+@text: 
+@per_page: 
+@page: 
+@Returns: 
+
+

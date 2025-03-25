@@ -1,0 +1,59 @@
+***** Dependencies compiled from source:
+
+flickcurl-1.26
+
+	Required for Flickr transport.
+	In 3rd-party subdirectory.
+	Home page: http://download.dajobe.org/flickcurl/
+	License: Apache License Version 2.0, January 2004
+
+veil
+
+	Required for JPEG / MJPG encoding, Flickr transport, and
+	motion JPEG simplex and duplex transports.
+	Home page: https://github.com/yegnev/veil
+	License: 3-clause BSD license
+
+libjpeg (various versions)
+
+License terms from README file included with versions of libjpeg:
+
+"This software is copyright (C) 1991-2010, Thomas G. Lane, Guido Vollbeding.
+All Rights Reserved except as specified below.
+
+Permission is hereby granted to use, copy, modify, and distribute this
+software (or portions thereof) for any purpose, without fee, subject to these
+conditions:
+(1) If any part of the source code for this software is distributed, then this
+README file must be included, with this copyright and no-warranty notice
+unaltered; and any additions, deletions, or changes to the original files
+must be clearly indicated in accompanying documentation.
+(2) If only executable code is distributed, then the accompanying
+documentation must state that "this software is based in part on the work of
+the Independent JPEG Group".
+(3) Permission for use of this software is granted only if the user accepts
+full responsibility for any undesirable consequences; the authors accept
+NO LIABILITY for damages of any kind."
+
+
+***** Required Python packages:
+
+Pillow
+
+	Required for video steganography.
+	Github: https://github.com/python-pillow/Pillow.git
+	License:  Open source HPND License
+
+
+***** Required Debian packages:
+
+apt-get -y install libxml2-dev
+
+	License: MIT License
+	
+apt-get -y install parallel
+
+	License: GPL, but parallel is used strictly as a shell command
+	and not integrated into any RACE code.
+
+

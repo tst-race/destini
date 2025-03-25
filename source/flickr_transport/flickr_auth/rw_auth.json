@@ -1,0 +1,265 @@
+// Twitter info:
+//
+// API key:         tmUtAl7xAoAQMHDzTF2arsPqu
+// API key secret:  LjQ7Rggll5J49IoVnQ4iFqliTFOOiGQdlPLeZd7iKlO45b7NQY
+//
+// Bearer token:    AAAAAAAAAAAAAAAAAAAAAMD0oAEAAAAAbP4IT7Biw%2FMpEA6BHc7O4wBhlY8%3DvJefoVFLkPJHOphqSotohLMFSRcaa1nnrzvGpgxdUozgVk5kgQ
+//
+// Access token:         159625827-PRGw32RmGq7bYCoTNttCXaurT6NWonRZf77MHYDP
+// Access token secret:  gj93faiRn1uf25Pn9nMoQSJi0euAiEoEFLEdVZ94gRLIe
+//
+// Client ID:            ODZzNDdEWXJEMkhna0xfZjVfbTk6MTpjaQ
+// Client secret:        xeUf4RK-tN_foCy4ewhkQs4hRmDhLgo3zeUL7Yo9A2PNb8sh76
+
+
+
+//
+// At the top level, we index by whiteboard.  The 'chat' interface
+// will select by whiteboard, and authenticate using the given credentials
+//
+{
+    "flickr" : {
+	"race-client-00001" : { "username" : "christopher_connolly",
+			  "email" : "christopher_connolly@comcast.net",
+			  "key"    : "51ae7865870d9392d9d096e684e4a45a",
+			  "secret" : "e27bf98a69e46848",
+			  "oauth_token" : "72157720837737276-762533692210e079",
+			  "oauth_token_secret" : "f71b61d8ba61b1a6",
+			  "oauth_verifier" : "f71b61d8ba61b1a6"
+			},
+
+	"race-client-00002" : { "username" : "cijc4358",
+			  "email"    : "cijc4358@gmail.com",
+			  "key"    : "51ae7865870d9392d9d096e684e4a45a",
+			  "secret" : "e27bf98a69e46848",
+			  "oauth_token" : "72157720863434963-f3d44f9891cde4a1",
+			  "oauth_token_secret" : "9ec5d89fed2cd876",
+			  "oauth_verifier" : "9ec5d89fed2cd876"
+			},
+	
+	"race-server-00001" : { "username" : "cijc2031",
+			  "email"   : "cijc2031@gmail.com",
+			  "key"      : "51ae7865870d9392d9d096e684e4a45a",
+			  "secret" : "e27bf98a69e46848",
+			  "oauth_token" : "72157720863431280-187a6cc9b9dcb8c3",
+			  "oauth_verifier" : "45164289f93189d9",
+			  "real_oauth_verifier" : "5c23fbda1e56c182",
+			  "oauth_token_secret" : "45164289f93189d9"
+			},
+
+	"race-server-00002" : { "username" : "cijc6984",
+			  "email" : "cijc6984@gmail.com",
+			  "key"      : "51ae7865870d9392d9d096e684e4a45a",
+			  "secret" : "e27bf98a69e46848",
+			  "oauth_token" : "72157720863431485-b9987f4c2afaf838",
+			  "oauth_token_secret" : "5b781b6d32a96d85",
+			  "oauth_verifier" : "3cad1dfccd299813"
+			},
+	
+	"race-server-00003" : { "username" : "cijc6676",
+			  "email" : "cijc6676@gmail.com",
+			  "key"      : "51ae7865870d9392d9d096e684e4a45a",
+			  "secret" : "e27bf98a69e46848",
+			  "oauth_token" : "72157720863411535-a5043c23591ad7db",
+			  "oauth_token_secret" : "6c1e2fe152c93cdc",
+			  "oauth_verifier" : "443d9c364c017ef8"
+			},
+
+	"race-server-00004" : { "username" : "ciconnolly",
+			  "email"    : "ciconnolly@mac.com",
+			  "key"      : "51ae7865870d9392d9d096e684e4a45a",
+			  "secret" : "e27bf98a69e46848",
+			  "oauth_token" : "72157720869814769-1e7317a11b40e385",
+			  "oauth_token_secret" :  "1878d1691cc887ae",
+			  "oauth_verifier" : "6b2f4891098d104f"
+			}
+
+    },
+
+    "tumblr" : {
+	"race-client-00001" : { "username" : "ciconnolly",
+			  "email" : "christopher_connolly@comcast.net",
+			  "blog" : "myracegroup.tumblr.com",
+			  "consumer_key": "x19eV0Zt3C0s19q77obnAU9IqjqgI3jJyEZVXKGaqKKd7dLzvH",
+			  "consumer_secret": "fsGQ6qJ7HgCKqYmSftn3h61SRUjNvEwhjUgRR63OrIqdHuKIkQ",
+			  "token": "q7wqn2WFjBrsQhwOJJuwHNfPnC7Mn3hzRyDuTyD3JVAYbt5wNM",
+			  "token_secret" : "uumeFuRvqnvBcadTORjGsNmzdprT3av3Gls7XMd57biPpHWHjN"
+			},
+	"race-client-00002" : { "username" : "ianconnolly",
+			  "email" : "ciconnolly@mac.com",
+			  "blog" : "myracegroup.tumblr.com",
+			  "consumer_key": "x19eV0Zt3C0s19q77obnAU9IqjqgI3jJyEZVXKGaqKKd7dLzvH",
+			  "consumer_secret": "fsGQ6qJ7HgCKqYmSftn3h61SRUjNvEwhjUgRR63OrIqdHuKIkQ",
+			  "token": "Cnf965kqzqp3YHHdh9E1VFPtCuwuAHeeSZyHYlCrM2INP0i3L2",
+			  "token_secret" : "QEIruERJHSpG8xHV8rgpcc8aDlifxjtc0hipmJ12tHPkXCwfod"
+			},
+	
+	"user3" : { "username" : "iansdestini",
+                    "email" : "ianc5680@gmail.com"
+		  },
+	"race-server-00001" : { "username" : "cijc6984",
+			  "email" : "cijc6984@gmail.com",
+			  "blog" : "myracegroup.tumblr.com",
+			  "consumer_key": "x19eV0Zt3C0s19q77obnAU9IqjqgI3jJyEZVXKGaqKKd7dLzvH",
+			  "consumer_secret": "fsGQ6qJ7HgCKqYmSftn3h61SRUjNvEwhjUgRR63OrIqdHuKIkQ",
+			  "token"  :  "9SMrLydgbFMuhBArhtCkVbMWmnagzdSDblJh3tfl1LWrscFPWf",
+			  "token_secret" : "C2bNj0s0UkB0uvVngIHIcaStHHPGNbBP444dN6Aaq9N9WqEPlb"
+			},
+	"race-server-00002" : { "username" : "cijc6676",
+			  "email" : "cijc6676@gmail.com",
+			  "blog" : "myracegroup.tumblr.com",
+			  "consumer_key": "x19eV0Zt3C0s19q77obnAU9IqjqgI3jJyEZVXKGaqKKd7dLzvH",
+			  "consumer_secret": "fsGQ6qJ7HgCKqYmSftn3h61SRUjNvEwhjUgRR63OrIqdHuKIkQ",
+			  "token" : "02CfTIMOYqCd9NIPboUTm6SFJzbsK1u7P0mi8ZtOoOD8q5Tk3z",
+			  "token_secret" : "ByhPA3yXk3Lojo6iUMylG71IXQlKpoCYjKiP5xR7auXPeU1kv6"
+			},
+	"race-server-00003" : { "username" : "cijc4358",
+			  "email"    : "cijc4358@gmail.com",
+			  "blog"     : "myracegroup.tumblr.com",
+			  "consumer_key": "x19eV0Zt3C0s19q77obnAU9IqjqgI3jJyEZVXKGaqKKd7dLzvH",
+			  "consumer_secret": "fsGQ6qJ7HgCKqYmSftn3h61SRUjNvEwhjUgRR63OrIqdHuKIkQ",
+			  "token" : "oW0SdNzadwH7sqhf6DgTNmFgWWwrE1NbLgZWbUmxfWoY1I7I6h",
+			  "token_secret" : "BmCcWlAjfKyGiYajhwTod6Ef0HLWltk9A3U1TOp7Cx0uqKzegg"
+			},
+	"race-server-00004" : { "username" : "cijc2031",
+			  "email"   : "cijc2031@gmail.com",
+			  "blog" : "myracegroup.tumblr.com",
+			  "consumer_key": "x19eV0Zt3C0s19q77obnAU9IqjqgI3jJyEZVXKGaqKKd7dLzvH",
+			  "consumer_secret": "fsGQ6qJ7HgCKqYmSftn3h61SRUjNvEwhjUgRR63OrIqdHuKIkQ",
+			  "token"        :  "ZuDFaijqRhVv1YBNkhRKCtfmm8y6eGTecHSKesb5RNfZ8jAUl8",
+			  "token_secret" : "bhb4vlWw1DDawnoss8vptcRIchiNb71zGoEVRO0p5HGFmysKV3"
+			}
+    },
+    // Client id for ImgurWB:       8eb31e854de423b
+    // Client secret for ImgurWB:   94ce6e2bd1fc0eb03353964297ef7bb6c67b4387
+    "imgur" : {
+	"race-client-00001" : { "username" : "ciconnolly",
+				"client_id" : "8eb31e854de423b",
+				"client_secret" : "94ce6e2bd1fc0eb03353964297ef7bb6c67b4387",
+				"access_token" : "1055ec9d7edcd03c188b7122e06a907c407ff4a3",
+				"refresh_token" : "ed1315f162e79c9383b54b2d1f38e0f17c631850"
+			      },
+
+	"race-client-00002" : { "username" : "rnc6676",
+				"email" : "cijc6676@gmail.com",
+				"account_id" : "166507725",
+				"client_id" : "8eb31e854de423b",
+				"client_secret" : "94ce6e2bd1fc0eb03353964297ef7bb6c67b4387",
+				"access_token" : "06535e1a9f522935d7985909a2c782a99c9fad38",
+				"refresh_token" : "66779dc32185a13c2b080dee1a202230eb40589d"
+			      },
+
+
+	"race-server-00001" : {
+	    "username" : "cijc4358",
+	    "email"    : "cijc4358@gmail.com",
+	    "account_id" : "165440389",
+	    "client_id" : "8eb31e854de423b",
+	    "client_secret" : "94ce6e2bd1fc0eb03353964297ef7bb6c67b4387",
+	    "access_token" : "65bbd98c55de00d350451b389dd2ddd29d0b21be",
+	    "refresh_token" : "bc0f3c2510fd95f937847f9ee5dfcaf39bd2a32f"
+	},
+
+	"race-server-00002" : {
+	    "username" : "cijc2031",
+	    "email"   : "cijc2031@gmail.com",
+	    "account_id" : "165377009",
+	    "client_id" : "8eb31e854de423b",
+	    "client_secret" : "94ce6e2bd1fc0eb03353964297ef7bb6c67b4387",
+	    "access_token" : "15f3ddc98674f4ef3572862bfeeca1e7a4bdc501",
+	    "refresh_token" : "fb7ac4de526a92c4dcdd9b59667edf57e9d7c96d"
+	},
+
+	"race-server-00003" : {
+	    "username" : "chatmate24",
+	    "email" : "chatmate24@gmail.com",
+	    "account_id" : "163631977",
+	    "client_id" : "8eb31e854de423b",
+	    "client_secret" : "94ce6e2bd1fc0eb03353964297ef7bb6c67b4387",
+	    "access_token" : "d0bac724ede51a527be0333881b23274d7efa01d",
+	    "refresh_token" : "1920966f1f1034f3975ad2891bd1ec6e27602a47"
+	},
+	
+	"race-server-00004" : {
+	    "username" : "chatmate23",
+	    "email" : "chatmate23@gmail.com",
+	    "account_id" : "163526541",
+	    "client_id" : "8eb31e854de423b",
+	    "client_secret" : "94ce6e2bd1fc0eb03353964297ef7bb6c67b4387",
+	    "access_token" : "7037208bf18970aaa0f667970ecd7969205fe3b7",
+	    "refresh_token" : "4a6e1d15c0f07f17f6eb80fe885414f8163dbcaa"
+	}
+    },
+    "twitter" : {
+	"race-client-00001" : {
+	    "username" : "coffee_oracle",
+	    "email" : "ciconnolly@me.com",
+	    "api_key" : "tmUtAl7xAoAQMHDzTF2arsPqu",
+	    "api_key_secret" : "LjQ7Rggll5J49IoVnQ4iFqliTFOOiGQdlPLeZd7iKlO45b7NQY",
+	    "bearer_token" : "AAAAAAAAAAAAAAAAAAAAAMD0oAEAAAAAbP4IT7Biw%2FMpEA6BHc7O4wBhlY8%3DvJefoVFLkPJHOphqSotohLMFSRcaa1nnrzvGpgxdUozgVk5kgQ",
+	    "access_token" : "159625827-PRGw32RmGq7bYCoTNttCXaurT6NWonRZf77MHYDP",
+	    "access_token_secret" : "gj93faiRn1uf25Pn9nMoQSJi0euAiEoEFLEdVZ94gRLIe",
+	    "oauth_verifier" : "",
+	    "user_id" : "159625827",
+	    "refresh_token" : ""
+	},
+	"race-client-00002" : {
+	    "username" : "rnc6676",
+	    "email" : "cijc6676@gmail.com",
+	    "api_key" : "WpOzJtGPT1w4IGARhT3U7Gcke",
+	    "api_key_secret" : "N0W0iepFXjO1ZcSFlBR8J8ZQLPmKblr6529cV25W6qTEOqy33f",
+	    "bearer_token" : "AAAAAAAAAAAAAAAAAAAAACYPmQEAAAAA1QscsuX2XN55g3QVPiH%2BIlCXtAA%3DbKP3RjA1EmgEQlhtejZsAdsjk2yIKcanVBriXSv3bmpJwG1qgn",
+	    "access_token" :  "1636475577912938497-xJT1L6dMzQFAJ7mlOSCaPsJFWRUCcM",
+	    "access_token_secret" : "il9aLrnhn0BB17dxIBBNMiwzY4E6gvlxAmexDxC7AxhlN",
+	    "user_id" : "1636475577912938497",
+	    "refresh_token" : ""
+	},
+	"race-server-00001" : {
+	    "username" : "cijc4358",
+	    "email"    : "cijc4358@gmail.com",
+	    "api_key" : "WpOzJtGPT1w4IGARhT3U7Gcke",
+	    "api_key_secret" : "N0W0iepFXjO1ZcSFlBR8J8ZQLPmKblr6529cV25W6qTEOqy33f",
+	    "bearer_token" : "AAAAAAAAAAAAAAAAAAAAACYPmQEAAAAA1QscsuX2XN55g3QVPiH%2BIlCXtAA%3DbKP3RjA1EmgEQlhtejZsAdsjk2yIKcanVBriXSv3bmpJwG1qgn",
+	    "access_token" :  "1633898411694116866-j1O5QYzu2HnnW7polzwBaRTtTh6kPM",
+	    "access_token_secret" :  "XFSNTxkHWcag5qE5ay9sh8a40ohXFfq0O7ynXIqVoEsUT",
+	    "user_id" : "1633898411694116866",
+	    "refresh_token" : ""
+	},
+	"race-server-00002" : {
+	    "username" : "cijc2031",
+	    "email"   : "cijc2031@gmail.com",
+	    "api_key" : "WpOzJtGPT1w4IGARhT3U7Gcke",
+	    "api_key_secret" : "N0W0iepFXjO1ZcSFlBR8J8ZQLPmKblr6529cV25W6qTEOqy33f",
+	    "bearer_token" : "AAAAAAAAAAAAAAAAAAAAACYPmQEAAAAA1QscsuX2XN55g3QVPiH%2BIlCXtAA%3DbKP3RjA1EmgEQlhtejZsAdsjk2yIKcanVBriXSv3bmpJwG1qgn",
+	    "access_token" :  "1636755111086272512-dTAn1SzL1pdvuxd7ySS6eNhCLkyWf4",
+	    "access_token_secret" :  "tWK5tm9CiQ0efT3ZgbV4SVu4pkzAwqDeZPvZN0aQGKZeB",
+	    "user_id" : "1636755111086272512",
+	    "refresh_token" : ""
+	},
+	"race-server-00003" : {
+	    "username" : "chatmate24",
+	    "email" : "chatmate24@gmail.com",
+	    "api_key" : "WpOzJtGPT1w4IGARhT3U7Gcke",
+	    "api_key_secret" : "N0W0iepFXjO1ZcSFlBR8J8ZQLPmKblr6529cV25W6qTEOqy33f",
+	    "bearer_token" : "AAAAAAAAAAAAAAAAAAAAACYPmQEAAAAA1QscsuX2XN55g3QVPiH%2BIlCXtAA%3DbKP3RjA1EmgEQlhtejZsAdsjk2yIKcanVBriXSv3bmpJwG1qgn",
+	    "user_id" : "1638947492355264513",
+	    "access_token" :  "1638947492355264513-UxKERBxGFdQdP7OQzPGBdeBDlmXRyQ",
+	    "access_token_secret" :  "OTwqAt0PF4ud9Ai4IpuNmT6qkYVScPUbu3hUYNbPTjAUD",
+	    "refresh_token" : ""
+	},
+	"race-server-00004" : {
+	    "username" : "cijc6984",
+	    "email" : "cijc6984@gmail.com",
+	    "api_key" : "WpOzJtGPT1w4IGARhT3U7Gcke",
+	    "api_key_secret" : "N0W0iepFXjO1ZcSFlBR8J8ZQLPmKblr6529cV25W6qTEOqy33f",
+	    "bearer_token" : "AAAAAAAAAAAAAAAAAAAAACYPmQEAAAAA1QscsuX2XN55g3QVPiH%2BIlCXtAA%3DbKP3RjA1EmgEQlhtejZsAdsjk2yIKcanVBriXSv3bmpJwG1qgn",
+	    "access_token" :  "1636757572782030848-ZXFKHyHJE2KKADOHmIoPf2dbfVfrpB",
+	    "access_token_secret" :  "pfiREiK1rO42IVgwQLK8H0ezAh2bjkVqGBjoArApob8LF",
+	    "user_id" : "1636757572782030848",
+	    "refresh_token" : ""
+	}
+
+    }
+}
+
+

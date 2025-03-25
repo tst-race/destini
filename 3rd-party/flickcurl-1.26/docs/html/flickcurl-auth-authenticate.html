@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Getting Authentication Token from Client Key and Client Secret</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
+<link rel="home" href="index.html" title="Flickcurl Flickr API Manual">
+<link rel="up" href="flickcurl-auth.html" title="Authenticating Flickcurl for OAuth">
+<link rel="prev" href="flickcurl-auth-register.html" title="Register application to get Client Key and Client Secret">
+<link rel="next" href="flickcurl-auth-use.html" title="Use Flickcurl">
+<meta name="generator" content="GTK-Doc V1.18 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2"><tr valign="middle">
+<td><a accesskey="p" href="flickcurl-auth-register.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="flickcurl-auth.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">Flickcurl Flickr API Manual</th>
+<td><a accesskey="n" href="flickcurl-auth-use.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr></table>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="flickcurl-auth-authenticate"></a>Getting Authentication Token from Client Key and Client Secret</h2></div></div></div>
+<p>
+If using the flickcurl command line tool, create a file
+<code class="filename">~/.flickcurl.conf</code> with the two values found in
+the previous section - API becomes <code class="code">oauth_client_key</code>
+and the Shared Secret becomes <code class="code">oauth_client_secret</code> like this:
+</p>
+<pre class="programlisting">
+  [flickr]
+  oauth_client_key=0123456789abcdef0123456789abcdef
+  oauth_client_secret=fedcba9876543210
+</pre>
+<p>Next the <span class="emphasis"><em>Request Token</em></span>, <span class="emphasis"><em>Request
+Token Secret</em></span> need to be created and the
+<span class="emphasis"><em>Authentication URL</em></span> generated from them.
+</p>
+<p>The request token is created using the API request:
+<a class="link" href="flickcurl-section-auth.html#flickcurl-oauth-create-request-token" title="flickcurl_oauth_create_request_token ()">flickcurl_oauth_create_request_token()</a>
+which takes an optional <span class="emphasis"><em>Callback URL</em></span> argument,
+that can be used for the browser to redirect to, if required.
+Otherwise use <code class="code">"oob"</code> or <code class="code">NULL</code>.  It creates
+and sets the Request Token and Request Token Secret in
+the <code class="code">flickcurl</code> object, which can be returned with:
+<a class="link" href="flickcurl-section-auth.html#flickcurl-get-oauth-request-token" title="flickcurl_get_oauth_request_token ()">flickcurl_get_oauth_request_token()</a>
+and
+<a class="link" href="flickcurl-section-auth.html#flickcurl-get-oauth-request-token-secret" title="flickcurl_get_oauth_request_token_secret ()">flickcurl_get_oauth_request_token_secret()</a>.
+</p>
+<pre class="programlisting">
+   rc = flickcurl_oauth_create_request_token(fc, callback);
+   request_token = flickcurl_get_oauth_request_token(fc);
+   request_token_secret = flickcurl_get_oauth_request_token_secret(fc);
+   uri = flickcurl_oauth_get_authorize_uri(fc);
+</pre>
+<p>The <span class="command"><strong>flickcurl(1)</strong></span> utility can also perform this
+sequence with:</p>
+<pre class="programlisting">
+  $ flickcurl oauth-create
+</pre>
+<p>which will print the request token, request token secret and
+Authentication URL.  This command takes an optional callback URL
+argument.
+</p>
+<p>The resulting request token and secret will look like
+<code class="code">72157626737672178-022bbd2f4c2f3432</code> and
+<code class="code">fccb68c4e6103197</code> respectively.
+</p>
+<p>
+The Authentication URL should then be used to prompt the user a web
+browser to validate the request.
+</p>
+<p>Flickr will return a page that says something like:</p>
+<pre class="programlisting">
+  "[APP NAME] wants to link to your Flickr account"
+</pre>
+<p>with more information and two buttons.  Click the button
+with the text:</p>
+<pre class="programlisting">
+  [OK, I'LL AUTHORIZE IT]
+</pre>
+<div class="mediaobject" align="center">
+<img src="appgarden-mobile-auth-page.png" align="middle" width="432"><div class="caption"><p>Flickr App Garden - Mobile Auth</p></div>
+</div>
+<p>Flickr will then return the
+9-digit <span class="emphasis"><em>Verifier</em></span> that looks
+like <code class="code">123-456-789</code> In one of two ways depending if a
+callback URL was given:</p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem"><p>Callback URL: Returns a redirect to
+    the <span class="emphasis"><em>Callback URL</em></span> with a query
+    parameter <code class="code">oauth_verifier</code> whose value is the
+    Verifier.  The application has to extract that value and pass it
+    to the flickcurl library.
+    </p></li>
+<li class="listitem"><p>No callback URL: Will display a page that shows the 
+    <span class="emphasis"><em>Verifier</em></span>.  This will require the user to
+    type it into the application.
+    </p></li>
+</ol></div>
+<p>
+Now the Request Token, Request Token Secret and Verifier can be used
+to generate the <span class="emphasis"><em>Access Token</em></span> and
+<span class="emphasis"><em>Access Token Secret</em></span>.
+</p>
+<pre class="programlisting">
+  /* These are required to be set for this call */
+  flickcurl_set_oauth_request_token(fc, request_token);
+  flickcurl_set_oauth_request_token_secret(fc, request_token_secret);
+
+  rc = flickcurl_oauth_create_access_token(fc, verifier);
+</pre>
+<p>This sets the Access Token and Access Token Secret in
+the <code class="code">flickcurl</code> object, which can be returned with:
+<a class="link" href="flickcurl-section-auth.html#flickcurl-get-oauth-token" title="flickcurl_get_oauth_token ()">flickcurl_get_oauth_token()</a>
+and
+<a class="link" href="flickcurl-section-auth.html#flickcurl-get-oauth-token-secret" title="flickcurl_get_oauth_token_secret ()">flickcurl_get_oauth_token_secret()</a>.
+The application should then store these values for use in making API
+calls along with the Client Key and Client Secret.
+</p>
+<p>The <span class="command"><strong>flickcurl(1)</strong></span> utility can also perform this
+verification with:</p>
+<pre class="programlisting">
+  $ flickcurl oauth-verify 72157626737672178-022bbd2f4c2f3432 fccb68c4e6103197 123-456-789
+  flickcurl: OAuth access token returned token '72157626737672178-022bbd2f4c2f3432' secret token 'fccb68c4e6103197'
+  flickcurl: Updated configuration file /Users/NAME/.flickcurl.conf with authentication token
+</pre>
+<p>It writes the resulting Access Token and Access Token Secret to
+the <code class="filename">~/.flickcurl.conf</code> configuration file as the
+<code class="code">oauth_token</code> and <code class="code">oauth_token_secret</code> fields
+to give something like:</p>
+<pre class="programlisting">
+  $ cat ~/.flickcurl.conf
+  [flickr]
+  oauth_token=12345678901234567-abcdef0123456789
+  oauth_token_secret=abcdef9876543210
+  oauth_client_key=0123456789abcdef0123456789abcdef
+  oauth_client_secret=fedcba9876543210
+</pre>
+<p>
+At this stage, the <span class="command"><strong>flickcurl(1)</strong></span> utility or library is
+authenticated and ready to use.
+</p>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.18</div>
+</body>
+</html>
