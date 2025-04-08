@@ -93,7 +93,7 @@ bool PluginTa2SRIFlickrTransport::preLinkCreate(const std::string &logPrefix, Ra
                                                  LinkSide invalideRoleLinkSide) {
     logDebug(logPrefix + "in PluginTa2SRIFlickrTransport::preLinkCreate");
     int numLinks = links.size();
-    if (numLinks >= channelProperties.maxLinks) {
+    if (channelProperties.maxLinks > 0 && numLinks >= channelProperties.maxLinks) {
         logError(logPrefix + "preLinkCreate: Too many links. links: " + std::to_string(numLinks) +
                  ", maxLinks: " + std::to_string(channelProperties.maxLinks));
         sdk->onLinkStatusChanged(handle, linkId, LINK_DESTROYED, {});
