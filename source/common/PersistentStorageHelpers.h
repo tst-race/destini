@@ -15,8 +15,8 @@
 // limitations under the License.
 //
 
-#ifndef __PERSISTENT_STORAGE_HELPERS_H__
-#define __PERSISTENT_STORAGE_HELPERS_H__
+#ifndef PERSISTENT_STORAGE_HELPERS_H
+#define PERSISTENT_STORAGE_HELPERS_H
 
 #include <sstream>
 #include <string>

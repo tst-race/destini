@@ -20,29 +20,20 @@ PluginTA2SRICLIEncoding::PluginTA2SRICLIEncoding(IEncodingSdk *_sdk, const Plugi
     }
 
     this->cliCodec = nullptr;
+    CLICodec::SetDirname (this->pluginConfig.pluginDirectory);
 
-#if 0
-    if (this->pluginConfig.pluginDirectory.length () /* > 0 */)
-      CLICodec::SetDirname ("/usr/local/lib/race/ta2/PluginTA2SRIDecomposed");
-    else
-#endif
-      ///////////////////////////////////////////////////////////////
-      /* Discrepancy in PluginConfig.h - There are two versions of
-	 PluginConfig.h.  One is missing the slot "pluginDirectory,
-	 while the other throws a huge pile of compile errors in
-	 nlohmann/json.cpp */
-      
-      // This does not exist:
-      // CLICodec::SetDirname (this->pluginConfig.pluginDirectory);
-
-      // This does:
-      CLICodec::SetDirname (this->pluginConfig.etcDirectory);
 
     // Get codec definition
 
     // auto codecJSONPath = CLICodec::DirFilename ("codec.json");
     // Horrible hack:
-    auto codecJSONPath = CLICodec::DirFilename("/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/codec.json");
+    logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: etcDirectory " + _pluginConfig.etcDirectory);
+    logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: loggingDirectory " + _pluginConfig.loggingDirectory);
+    logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: auxDataDirectory " + _pluginConfig.auxDataDirectory);
+    logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: tmpDirectory " + _pluginConfig.tmpDirectory);
+    logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: pluginDirectory " + _pluginConfig.pluginDirectory);
+    // auto codecJSONPath = CLICodec::DirFilename("/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/codec.json");
+    auto codecJSONPath = CLICodec::DirFilename(pluginConfig.pluginDirectory + "codec.json");
     auto codecJSON     = codecJSONPath.c_str ();
 
     // The codec.json file contains info about how to do the encoding

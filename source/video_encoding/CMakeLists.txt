@@ -9,7 +9,4 @@ setup_component_target(
         CLICodec.cpp
         StringUtility.cpp
         ../common/log.cpp
-        PluginTa2TwoSixBase64Encoding.cpp
-        PluginTa2TwoSixNoopEncoding.cpp
-        PluginTa2TwoSixStubEncoding.cpp
 )

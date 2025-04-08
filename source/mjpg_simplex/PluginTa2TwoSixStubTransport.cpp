@@ -43,7 +43,7 @@ LinkProperties createDefaultLinkProperties(const ChannelProperties &channelPrope
     linkProperties.best.send = bestLinkPropertySet;
     linkProperties.best.receive = bestLinkPropertySet;
 
-    linkProperties.supported_hints = channelProperties.supported_hints;
+    linkProperties.supported_hints = channelProperties.supportedHints;
     linkProperties.channelGid = channelProperties.channelGid;
 
     return linkProperties;

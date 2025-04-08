@@ -1,5 +1,5 @@
-#ifndef __TA2_TWOSIX_TRANSPORT_LINK_MAP_H__
-#define __TA2_TWOSIX_TRANSPORT_LINK_MAP_H__
+#ifndef TA2_TWOSIX_TRANSPORT_LINK_MAP_H
+#define TA2_TWOSIX_TRANSPORT_LINK_MAP_H
 
 #include <memory>
 #include <mutex>

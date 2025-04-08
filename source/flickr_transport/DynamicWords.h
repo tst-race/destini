@@ -1,5 +1,5 @@
-#ifndef __TA2_SRI_DYNAMICWORDS_H__
-#define __TA2_SRI_DYNAMICWORDS_H__
+#ifndef TA2_SRI_DYNAMICWORDS_H
+#define TA2_SRI_DYNAMICWORDS_H
 
 class DynamicWords {
 

@@ -1,5 +1,5 @@
-#ifndef __TA2_TWOSIX_USER_MODEL_MARKOV_MODEL_H__
-#define __TA2_TWOSIX_USER_MODEL_MARKOV_MODEL_H__
+#ifndef TA2_TWOSIX_USER_MODEL_MARKOV_MODEL_H
+#define TA2_TWOSIX_USER_MODEL_MARKOV_MODEL_H
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <random>

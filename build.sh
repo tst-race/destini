@@ -158,8 +158,23 @@ popd
 formatlog "INFO" "Cleaning plugin/artifacts Before Building Artifacts"
 bash ${BASE_DIR}/clean_artifacts.sh
 
+LINUX_PRESET=LINUX_x86_64
+ARCH=x86_64
+if [ "$(uname -m)" == "aarch64" ] || [ "$(uname -m)" == "arm64" ]
+then
+    LINUX_PRESET=LINUX_arm64-v8a
+    ARCH=arm64-v8a
+fi
+
+# comment arm or x86 linux builds as needed for host architecture
+formatlog "INFO" "Building x86_64 Linux Client/Server"
+cmake --preset=$LINUX_PRESET \
+    -DBUILD_VERSION="local" --debug-output -DCXX="clang++ -std=c++17"
+# This will copy the output to plugin/artifacts/linux-x86_64-[client|server]
+cmake --build --preset=$LINUX_PRESET
+
 # *** TEMPORARY HACK: '==' -> '!=' to accommodate lack of jsoncpp on Android ***
-if [ "$(uname -m)" != "x86_64" ]
+if [ "$(uname -m)" == "x86_64" ]
 then
     formatlog "INFO" "Building Android x86_64 Client"
     cmake --preset=ANDROID_x86_64 -Wno-dev \
@@ -175,13 +190,6 @@ then
 else 
     echo "android builds not yet supported on arm64 hosts"
 fi
-
-# comment arm or x86 linux builds as needed for host architecture
-formatlog "INFO" "Building x86_64 Linux Client/Server"
-cmake --preset=LINUX_x86_64 -Wno-dev \
-    -DBUILD_VERSION="${RACE_VERSION}-${PLUGIN_REVISION}"
-# This will copy the output to plugin/artifacts/linux-x86_64-[client|server]
-cmake --build --preset=LINUX_x86_64
 
 #
 # Should expand this and use conditionals as in race-core/build.sh:

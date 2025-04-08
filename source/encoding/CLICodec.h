@@ -1,4 +1,4 @@
-#ifndef __CLICODEC_H__
+#ifndef CLICODEC_H
 
 #include <cstdint>
 #include <string>
@@ -129,5 +129,5 @@ class CLICodec
   bool isGood () {return _isGood;};
 };
 
-#define __CLICODEC_H__
+#define CLICODEC_H
 #endif

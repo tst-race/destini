@@ -15,8 +15,8 @@
 // limitations under the License.
 //
 
-#ifndef __COMMS_TWOSIX_COMMON_JSON_TYPES_H__
-#define __COMMS_TWOSIX_COMMON_JSON_TYPES_H__
+#ifndef COMMS_TWOSIX_COMMON_JSON_TYPES_H
+#define COMMS_TWOSIX_COMMON_JSON_TYPES_H
 
 
 #include <nlohmann/json.hpp>

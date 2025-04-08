@@ -2,38 +2,38 @@
 # Standard library dependencies (common to all components)
 ################################################################################
 
-if(ANDROID)
-    find_library(LIB_CURL curl)
-    find_library(LIB_XML2 xml)
-    find_package(Boost COMPONENTS filesystem system REQUIRED) 
-    find_library(LIB_CPPREST cpprest)
-    find_library(LIB_JSONCPP jsoncpp)
-    find_library(LIB_EVENT event)
-    find_library(LIB_LOG log)
-    find_library(LIB_FLICKCURL flickcurl)
-    find_library(RACE_JAVA_SHIMS RaceJavaShims)
-    find_library(LIB_SDK_COMMON raceSdkCommon)
+# if(ANDROID)
+#     find_library(LIB_CURL curl)
+#     find_library(LIB_XML2 xml)
+#     find_package(Boost COMPONENTS filesystem system REQUIRED) 
+#     find_library(LIB_CPPREST cpprest)
+#     find_library(LIB_JSONCPP jsoncpp)
+#     find_library(LIB_EVENT event)
+#     find_library(LIB_LOG log)
+#     find_library(LIB_FLICKCURL flickcurl)
+#     find_library(RACE_JAVA_SHIMS RaceJavaShims)
+#     find_library(LIB_SDK_COMMON raceSdkCommon)
 
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+#     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-    set(CMAKE_SKIP_BUILD_RPATH FALSE)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(CMAKE_INSTALL_RPATH "$ORIGIN")
+#     set(CMAKE_SKIP_BUILD_RPATH FALSE)
+#     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+#     set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
-    set(LIB_DEPS
-        ${LIB_SDK_COMMON}
-        ${LIB_CURL}
-	${LIB_XML2}
-        Boost::system
-        Boost::filesystem
-        ${LIB_CPPREST}
-        #${LIB_JSONCPP}
-        ${LIB_EVENT}
-        ${LIB_LOG}
-	${LIB_FLICKCURL}
-        ${RACE_JAVA_SHIMS}
-    )
-else()
+#     set(LIB_DEPS
+#         ${LIB_SDK_COMMON}
+#         ${LIB_CURL}
+# 	${LIB_XML2}
+#         Boost::system
+#         Boost::filesystem
+#         ${LIB_CPPREST}
+#         #${LIB_JSONCPP}
+#         ${LIB_EVENT}
+#         ${LIB_LOG}
+# 	${LIB_FLICKCURL}
+#         ${RACE_JAVA_SHIMS}
+#     )
+# else()
     ## Default to Linux
     find_package(CURL)
     find_package(Boost COMPONENTS filesystem system REQUIRED) 
@@ -44,10 +44,17 @@ else()
     find_library(LIB_JSONCPP jsoncpp)
     find_library(LIB_EVENT event)
     find_library(LIB_FLICKCURL flickcurl)
-    include_directories(${CURL_INCLUDE_DIR} ../racesdk/common/include ../racesdk/core/include )
+    # include_directories(${CURL_INCLUDE_DIR} ../racesdk/common/include ../racesdk/core/include )
+    # if ("${TARGET_ARCHITECTURE}" STREQUAL "LINUX_arm64-v8a")
+    # 	    include_directories(${CURL_INCLUDE_DIR} /linux/arm64-v8a/include )
+    # else()
+    # 	    include_directories(${CURL_INCLUDE_DIR} /linux/x86_64/include )
+    # endif()
+
+    message( "Found environment variable LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}" )
 
     set(LIB_DEPS
-        raceSdkCommon
+        # raceSdkCommon
         ${CURL_LIBRARIES}
         Boost::system
         Boost::filesystem
@@ -59,8 +66,9 @@ else()
 	${LIB_FLICKCURL}
 	${LIB_XML2}
     )
+    message( "LIB_FLICKCURL: ${LIB_FLICKCURL}" )
 
-endif()
+# endif()
 
 ################################################################################
 # Function to define the component CMake target
@@ -96,32 +104,32 @@ function(setup_component_target)
     )
 
     # TODO enable performance-* and readability-* checks (needs SDK fixes)
-    setup_clang_tidy_for_target(TARGET ${COMPONENT_TARGET})
-    setup_cppcheck_for_target(
-        TARGET ${COMPONENT_TARGET}
-        CHECKS all
-        SUPPRESS unmatchedSuppression unusedFunction missingIncludeSystem
-    )
-    setup_clang_format_for_target(${COMPONENT_TARGET} PARENT sri-race-plugins)
+    # setup_clang_tidy_for_target(TARGET ${COMPONENT_TARGET})
+    # setup_cppcheck_for_target(
+    #     TARGET ${COMPONENT_TARGET}
+    #     CHECKS all
+    #     SUPPRESS unmatchedSuppression unusedFunction missingIncludeSystem
+    # )
+    # setup_clang_format_for_target(${COMPONENT_TARGET} PARENT sri-race-plugins)
 
     install(
         TARGETS ${COMPONENT_TARGET}
-        LIBRARY DESTINATION lib/race/ta2/PluginTa2TwoSixStubDecomposed
+        LIBRARY DESTINATION lib/race/comms/PluginDestini
     )
 
-    if(ANDROID)
-        if ("${TARGET_ARCHITECTURE}" STREQUAL "ANDROID_arm64-v8a")
-            set(NODE_TYPE android-arm64-v8a-client)
-        else()
-            set(NODE_TYPE android-x86_64-client)
-        endif()
+    # if(ANDROID)
+    #     if ("${TARGET_ARCHITECTURE}" STREQUAL "ANDROID_arm64-v8a")
+    #         set(NODE_TYPE android-arm64-v8a-client)
+    #     else()
+    #         set(NODE_TYPE android-x86_64-client)
+    #     endif()
 
-        add_custom_command(TARGET ${COMPONENT_TARGET} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginTa2TwoSixStubDecomposed
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_TARGET}> ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginTa2TwoSixStubDecomposed/
-            BYPRODUCTS ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginTa2TwoSixStubDecomposed/lib${COMPONENT_TARGET}.so
-        )
-    else()
+    #     add_custom_command(TARGET ${COMPONENT_TARGET} POST_BUILD
+    #         COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginDestini
+    #         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_TARGET}> ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginDestini/
+    #         BYPRODUCTS ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginDestini/lib${COMPONENT_TARGET}.so
+    #     )
+    # else()
         if ("${TARGET_ARCHITECTURE}" STREQUAL "LINUX_arm64-v8a")
             set(NODE_TYPE linux-arm64-v8a)
         else()
@@ -129,15 +137,15 @@ function(setup_component_target)
         endif()
 
         add_custom_command(TARGET ${COMPONENT_TARGET} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginTa2TwoSixStubDecomposed
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginTa2TwoSixStubDecomposed
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_TARGET}> ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginTa2TwoSixStubDecomposed/
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_TARGET}> ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginTa2TwoSixStubDecomposed/
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_TARGET}> ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${COMPONENT_TARGET}> ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/
             BYPRODUCTS
-                ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginTa2TwoSixStubDecomposed/lib${COMPONENT_TARGET}.so
-                ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginTa2TwoSixStubDecomposed/lib${COMPONENT_TARGET}.so
+                ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/lib${COMPONENT_TARGET}.so
+                ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/lib${COMPONENT_TARGET}.so
         )
-    endif()
+    # endif()
 
 endfunction()
 
@@ -153,13 +161,13 @@ if(ANDROID)
     endif()
 
     add_custom_command(
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginTa2TwoSixStubDecomposed
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginTa2TwoSixStubDecomposed/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginDestini
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginDestini/
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
-        OUTPUT ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginTa2TwoSixStubDecomposed/manifest.json
+        OUTPUT ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginDestini/manifest.json
     )
-    add_custom_target(PluginTa2TwoSixStubManifest ALL
-        DEPENDS ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginTa2TwoSixStubDecomposed/manifest.json
+    add_custom_target(PluginDestiniManifest ALL
+        DEPENDS ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}/PluginDestini/manifest.json
     )
 else()
     if ("${TARGET_ARCHITECTURE}" STREQUAL "LINUX_arm64-v8a")
@@ -169,24 +177,26 @@ else()
     endif()
     
     add_custom_command(
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginTa2TwoSixStubDecomposed
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginTa2TwoSixStubDecomposed
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginTa2TwoSixStubDecomposed/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginTa2TwoSixStubDecomposed/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini
+        # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/
+        # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/mjpg_simplex/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/mjpg_simplex/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
         OUTPUT
-            ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginTa2TwoSixStubDecomposed/manifest.json
-            ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginTa2TwoSixStubDecomposed/manifest.json
+            ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/manifest.json
+            ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/manifest.json
     )
-    add_custom_target(PluginTa2TwoSixStubManifest ALL DEPENDS
-        ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginTa2TwoSixStubDecomposed/manifest.json
-        ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginTa2TwoSixStubDecomposed/manifest.json
+    add_custom_target(PluginDestiniManifest ALL DEPENDS
+        ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/manifest.json
+        ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/manifest.json
     )
 endif()
 
 install(
     FILES ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
-        DESTINATION lib/race/ta2/PluginTa2TwoSixStubDecomposed
+        DESTINATION lib/race/comms/PluginDestini
 )
 
 ################################################################################
@@ -199,4 +209,3 @@ add_subdirectory(mjpg_transport)
 add_subdirectory(mjpg_simplex)
 add_subdirectory(jel_encoding)
 add_subdirectory(video_encoding)
-add_subdirectory(user-model)

@@ -15,8 +15,8 @@
 // limitations under the License.
 //
 
-#ifndef __COMMS_TWOSIX_COMMON_LOG_H__
-#define __COMMS_TWOSIX_COMMON_LOG_H__
+#ifndef COMMS_TWOSIX_COMMON_LOG_H
+#define COMMS_TWOSIX_COMMON_LOG_H
 
 #include <RaceLog.h>
 

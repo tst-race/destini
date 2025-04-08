@@ -1,5 +1,5 @@
-#ifndef __TA2_SRI_MJPG_TRANSPORT_H__
-#define __TA2_SRI_MJPG_TRANSPORT_H__
+#ifndef TA2_SRI_MJPG_TRANSPORT_H
+#define TA2_SRI_MJPG_TRANSPORT_H
 
 #include <ChannelProperties.h>
 #include <ITransportComponent.h>

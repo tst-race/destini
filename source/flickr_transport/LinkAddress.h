@@ -1,5 +1,5 @@
-#ifndef __TA2_TWOSIX_TRANSPORT_LINK_PROFILE_H__
-#define __TA2_TWOSIX_TRANSPORT_LINK_PROFILE_H__
+#ifndef TA2_TWOSIX_TRANSPORT_LINK_PROFILE_H
+#define TA2_TWOSIX_TRANSPORT_LINK_PROFILE_H
 
 #include <nlohmann/json.hpp>
 #include <string>

@@ -1,5 +1,5 @@
-#ifndef __TA2_TWOSIX_TRANSPORT_LINK_H__
-#define __TA2_TWOSIX_TRANSPORT_LINK_H__
+#ifndef TA2_TWOSIX_TRANSPORT_LINK_H
+#define TA2_TWOSIX_TRANSPORT_LINK_H
 
 #include <ComponentTypes.h>
 #include <LinkProperties.h>
