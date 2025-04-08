@@ -3,6 +3,7 @@ FROM raceboat-compile:latest
 
 RUN apt-get update && \
     apt-get install -y \
+        libboost-all-dev \
    	libthrift-dev \
 	libjpeg62-dev \
 	libjsoncpp-dev \

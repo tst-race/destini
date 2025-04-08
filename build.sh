@@ -147,9 +147,9 @@ pip install psutil
 #ln -s /usr/include/libxml2/libxml
 #popd
 
-pushd 3rd-party/flickcurl-1.26
-make install
-popd
+# pushd 3rd-party/flickcurl-1.26
+# make install
+# popd
 
 #cp /code/external/flickcurl-1.26/src/.libs/libflickcurl.so.0.0.0 /usr/local/lib/libflickcurl.so
 #cp /code/external/flickcurl-1.26/src/.libs/libflickcurl.so.0.0.0 /etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/libflickcurl.so
@@ -173,23 +173,24 @@ cmake --preset=$LINUX_PRESET \
 # This will copy the output to plugin/artifacts/linux-x86_64-[client|server]
 cmake --build --preset=$LINUX_PRESET
 
-# *** TEMPORARY HACK: '==' -> '!=' to accommodate lack of jsoncpp on Android ***
-if [ "$(uname -m)" == "x86_64" ]
-then
-    formatlog "INFO" "Building Android x86_64 Client"
-    cmake --preset=ANDROID_x86_64 -Wno-dev \
-        -DBUILD_VERSION="${RACE_VERSION}-${PLUGIN_REVISION}"
-    # This will copy the output to plugin/artifacts/android-x86_64-client
-    cmake --build --preset=ANDROID_x86_64
+# TODO: Android Support - build error currently
+# # *** TEMPORARY HACK: '==' -> '!=' to accommodate lack of jsoncpp on Android ***
+# if [ "$(uname -m)" == "x86_64" ]
+# then
+#     formatlog "INFO" "Building Android x86_64 Client"
+#     cmake --preset=ANDROID_x86_64 -Wno-dev \
+#         -DBUILD_VERSION="${RACE_VERSION}-${PLUGIN_REVISION}"
+#     # This will copy the output to plugin/artifacts/android-x86_64-client
+#     cmake --build --preset=ANDROID_x86_64
 
-    formatlog "INFO" "Building Android arm64-v8a Client"
-    cmake --preset=ANDROID_arm64-v8a -Wno-dev \
-        -DBUILD_VERSION="${RACE_VERSION}-${PLUGIN_REVISION}"
-    # This will copy the output to plugin/artifacts/android-arm64-v8a-client
-    cmake --build --preset=ANDROID_arm64-v8a
-else 
-    echo "android builds not yet supported on arm64 hosts"
-fi
+#     formatlog "INFO" "Building Android arm64-v8a Client"
+#     cmake --preset=ANDROID_arm64-v8a -Wno-dev \
+#         -DBUILD_VERSION="${RACE_VERSION}-${PLUGIN_REVISION}"
+#     # This will copy the output to plugin/artifacts/android-arm64-v8a-client
+#     cmake --build --preset=ANDROID_arm64-v8a
+# else 
+#     echo "android builds not yet supported on arm64 hosts"
+# fi
 
 #
 # Should expand this and use conditionals as in race-core/build.sh:
