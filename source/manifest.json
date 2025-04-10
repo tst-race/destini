@@ -1,7 +1,7 @@
 {
     "plugins": [
 	{
-            "file_path": "PluginTA2SRIDecomposed",
+            "file_path": "PluginDestini",
             "plugin_type": "TA2",
             "file_type": "shared_library",
             "node_type": "any",
@@ -12,7 +12,7 @@
             "encodings": []
 	},
         {
-            "file_path": "PluginTA2SRIDecomposed",
+            "file_path": "PluginDestini",
             "plugin_type": "TA2",
             "file_type": "shared_library",
             "node_type": "any",
@@ -23,7 +23,7 @@
             "encodings": ["SRIVideoEncoding"]
         },
         {
-            "file_path": "PluginTA2SRIDecomposed",
+            "file_path": "PluginDestini",
             "plugin_type": "TA2",
             "file_type": "shared_library",
             "node_type": "any",
@@ -34,7 +34,7 @@
             "encodings": []
         },
         {
-            "file_path": "PluginTA2SRICLIEncoding",
+            "file_path": "PluginDestini",
             "plugin_type": "TA2",
             "file_type": "shared_library",
             "node_type": "any",
@@ -42,7 +42,7 @@
             "channels": [],
             "transports": [],
             "usermodels": [],
-            "encodings": ["base64", "noop", "SRICLIEncoding"]
+            "encodings": ["SRICLIEncoding"]
         }
     ],
     "compositions": [
@@ -98,6 +98,5 @@
 	}
     },
     "channel_parameters" : [
-    ],
-
+    ]
 }
