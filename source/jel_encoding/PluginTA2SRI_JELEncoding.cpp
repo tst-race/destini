@@ -1,3 +1,4 @@
+#include  <IEncodingComponent.h>
 #include "PluginTA2SRI_JELEncoding.h"
 
 #include <cstdlib>
@@ -139,3 +140,17 @@ ComponentStatus PluginTA2SRI_JELEncoding::decodeBytes(RaceHandle handle,
         return COMPONENT_OK;
     }
 }
+
+#ifndef TESTBUILD
+IEncodingComponent *createEncoding(const std::string &encoding, IEncodingSdk *sdk,
+                                   const std::string &roleName, const PluginConfig &pluginConfig) {
+    TRACE_FUNCTION(encoding, roleName, pluginConfig.pluginDirectory);
+    return new PluginTA2SRI_JELEncoding(sdk, pluginConfig);
+}
+void destroyEncoding(IEncodingComponent *component) {
+    TRACE_FUNCTION();
+    delete component;
+}
+
+const RaceVersionInfo raceVersion = RACE_VERSION;
+#endif

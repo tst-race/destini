@@ -1,3 +1,4 @@
+#include  <IEncodingComponent.h>
 #include "PluginTA2SRI_VideoEncoding.h"
 
 #include <cstdlib>
