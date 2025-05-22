@@ -34,7 +34,8 @@ PluginTA2SRICLIEncoding::PluginTA2SRICLIEncoding(IEncodingSdk *_sdk, const Plugi
     logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: tmpDirectory " + _pluginConfig.tmpDirectory);
     logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: pluginDirectory " + _pluginConfig.pluginDirectory);
     // auto codecJSONPath = CLICodec::DirFilename("/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/codec.json");
-    auto codecJSONPath = CLICodec::DirFilename(pluginConfig.pluginDirectory + "codec.json");
+    CLICodec::SetDirname(pluginConfig.pluginDirectory);
+    auto codecJSONPath = CLICodec::DirFilename("codec.json");
     auto codecJSON     = codecJSONPath.c_str ();
 
     // The codec.json file contains info about how to do the encoding

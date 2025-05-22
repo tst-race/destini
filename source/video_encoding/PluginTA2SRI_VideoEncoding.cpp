@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "log.h"
 
@@ -22,35 +23,20 @@ PluginTA2SRI_VideoEncoding::PluginTA2SRI_VideoEncoding(IEncodingSdk *_sdk, const
 
     this->cliCodec = nullptr;
 
-#if 0
-    // Not sure why this isn't working, but will have to test & fix:
-    if (this->pluginConfig.pluginDirectory.length () /* > 0 */)
-      // Old:
-      // JELCodec::SetDirname ("/usr/local/lib/race/ta2/PluginTA2SRIDecomposed");
-      // But let's put encoder-related stuff in /etc/race:
-      JELCodec::SetDirname ("/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed");
-    else
-#endif
-      ///////////////////////////////////////////////////////////////
-      /* Discrepancy in PluginConfig.h - There are two versions of
-	 PluginConfig.h.  One is missing the slot "pluginDirectory,
-	 while the other throws a huge pile of compile errors in
-	 nlohmann/json.cpp */
-      
-      // This does not exist:
-      // CLICodec::SetDirname (this->pluginConfig.pluginDirectory);
-
-      // This does:
-      CLICodec::SetDirname (this->pluginConfig.etcDirectory);
+    // This does:
+    CLICodec::SetDirname (this->pluginConfig.pluginDirectory);
+    
+    auto codecJSONPath = CLICodec::DirFilename(pluginConfig.pluginDirectory + "video_codec.json");
+    auto codecJSON     = codecJSONPath.c_str ();
 
     // Get codec definition
 
-    // We should be able to use this, but it seems to be broken:
-    auto codecJSONPath = CLICodec::DirFilename ("video_codec.json");   // works out to be /etc/race/etc/<channel>
+    // // We should be able to use this, but it seems to be broken:
+    // auto codecJSONPath = CLICodec::DirFilename ("video_codec.json");   // works out to be /etc/race/etc/<channel>
 
-    // Hack:  For now, the strategy is to keep all codec descriptors in the same SRI Decomposed Plugin directory.
-    // auto codecJSONPath = CLICodec::DirFilename("/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/video_codec.json");
-    auto codecJSON     = codecJSONPath.c_str ();
+    // // Hack:  For now, the strategy is to keep all codec descriptors in the same SRI Decomposed Plugin directory.
+    // // auto codecJSONPath = CLICodec::DirFilename("/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/video_codec.json");
+    // auto codecJSON     = codecJSONPath.c_str ();
 
     if (fileExists (codecJSON)) {
          std::ifstream fJSON (codecJSON);
@@ -114,6 +100,8 @@ ComponentStatus PluginTA2SRI_VideoEncoding::encodeBytes(RaceHandle handle,
         std::vector<uint8_t> encodedBytes (pMsgOut, pMsgOut + nMsgOut);
         free (pMsgOut);
 
+        logDebug("HASHING ENCODED BYTES");
+        logDebug("encoded bytes hash " + RaceLog::stringifyValues("hash", std::hash<std::string>()(std::string(encodedBytes.begin(), encodedBytes.end()))));
         sdk->onBytesEncoded (handle, encodedBytes, ENCODE_OK);
 
         return COMPONENT_OK;
@@ -123,7 +111,8 @@ ComponentStatus PluginTA2SRI_VideoEncoding::encodeBytes(RaceHandle handle,
 ComponentStatus PluginTA2SRI_VideoEncoding::decodeBytes(RaceHandle handle,
                                                      const EncodingParameters &params,
                                                      const std::vector<uint8_t> &bytes) {
-    TRACE_SRI_METHOD(handle, params.linkId, params.type, params.encodePackage, params.json);
+  auto thehash = std::hash<std::string>()({bytes.begin(), bytes.end()});
+  TRACE_SRI_METHOD(handle, params.linkId, params.type, params.encodePackage, params.json, thehash);
 
     // Per https://github.com/redboltz/mqtt_cpp/issues/854
     auto   *pMsgIn = bytes.data ();

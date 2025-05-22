@@ -50,6 +50,12 @@
             "id": "jelTwoSixIndirect",
             "transport": "twoSixIndirect",
             "usermodel": "rapidUser",
+            "encodings": ["SRICLIEncoding"]
+        },
+        {
+            "id": "videoTwoSixIndirect",
+            "transport": "twoSixIndirect",
+            "usermodel": "rapidUser",
             "encodings": ["SRIVideoEncoding"]
         },
         {
@@ -71,24 +77,30 @@
             "encodings": ["SRICLIEncoding"]
         }	
     ],
-        "channel_properties" : {
+    "channel_properties" : {
 	"jelTwoSixIndirect": {
 	    "channelGid": "jelTwoSixIndirect",
 	    "connectionType": "CT_INDIRECT",
 	    "linkDirection": "LD_BIDI",
-	    "transmissionType": "TT_MULTICAST",
+	    "transmissionType": "TT_MULTICAST"
 	},
-	"jelMJPGServer": {
+        "videoTwoSixIndirect": {
+	    "channelGid": "jelTwoSixIndirect",
+	    "connectionType": "CT_INDIRECT",
+	    "linkDirection": "LD_BIDI",
+	    "transmissionType": "TT_MULTICAST"
+	},
+            "jelMJPGServer": {
 	    "channelGid": "jelMJPGServer",
 	    "connectionType": "CT_INDIRECT",
 	    "linkDirection": "LD_CREATOR_TO_LOADER",
-	    "transmissionType": "TT_UNICAST",
+	    "transmissionType": "TT_UNICAST"
 	},
 	"jelMJPGClient": {
 	    "channelGid": "jelMJPGClient",
 	    "connectionType": "CT_INDIRECT",
 	    "linkDirection": "LD_LOADER_TO_CREATOR",
-	    "transmissionType": "TT_UNICAST",
+	    "transmissionType": "TT_UNICAST"
 	},
 	"jelFlickr": {
 	    "channelGid": "jelFlickr",

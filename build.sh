@@ -128,19 +128,21 @@ if [ -z "$(ls ${BASE_DIR}/cmake/*)" ]; then
     exit 1
 fi
 
-apt-get -y update
-apt-get -y install libboost-all-dev
-apt-get -y install libcpprest-dev
-apt-get -y install libxml2-dev
-apt-get -y install libjsoncpp-dev
-apt-get -y install libjpeg62-dev
-apt-get -y install libevent-dev
-# RISKY!  Do we know that this version has everything we need??
-apt-get -y install ffmpeg
-apt-get -y install parallel
+# PAUL COMMENTED OUT TO SPEED UP BUILD
+# apt-get -y update
+# apt-get -y install libboost-all-dev
+# apt-get -y install libcpprest-dev
+# apt-get -y install libxml2-dev
+# apt-get -y install libjsoncpp-dev
+# apt-get -y install libjpeg62-dev
+# apt-get -y install libevent-dev
+# # RISKY!  Do we know that this version has everything we need??
+# apt-get -y install ffmpeg
+# apt-get -y install parallel
 
-pip install pillow
-pip install psutil
+# pip install pillow
+# pip install psutil
+# / PAUL COMMENTED OUT TO SPEED UP BUILD
 
 #pushd /usr/local/include
 #ls /usr/include
@@ -172,6 +174,13 @@ cmake --preset=$LINUX_PRESET \
     -DBUILD_VERSION="local" --debug-output -DCXX="clang++ -std=c++17"
 # This will copy the output to plugin/artifacts/linux-x86_64-[client|server]
 cmake --build --preset=$LINUX_PRESET
+
+for NODETYPE in server client; do
+    cp jpeg-covers.tar kit/artifacts/linux-${ARCH}-${NODETYPE}/PluginDestini/
+    cp -r scripts/ kit/artifacts/linux-${ARCH}-${NODETYPE}/PluginDestini/
+    cp -r bin/ kit/artifacts/linux-${ARCH}-${NODETYPE}/PluginDestini/
+done
+
 
 # TODO: Android Support - build error currently
 # # *** TEMPORARY HACK: '==' -> '!=' to accommodate lack of jsoncpp on Android ***

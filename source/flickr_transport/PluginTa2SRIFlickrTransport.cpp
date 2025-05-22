@@ -7,13 +7,14 @@
 #include "Link.h"
 #include "LinkAddress.h"
 #include "log.h"
+#include "DynamicWords.h"
 
 #define WORDLIST "/etc/race/wordlist.txt"
 // If true, generate word lists as hashtags:
 #define HASHTAGS 1
 #define PRINT_LIST 0
 
-extern std::string getCurrentTags2(long);
+extern std::string getCurrentTags(long);
 
 namespace std {
 static std::ostream &operator<<(std::ostream &out, const std::vector<RaceHandle> &handles) {
@@ -133,15 +134,17 @@ ComponentStatus PluginTa2SRIFlickrTransport::postLinkCreate(const std::string &l
 std::shared_ptr<Link> PluginTa2SRIFlickrTransport::createLinkInstance(
     const LinkID &linkId, const LinkAddress &address, const LinkProperties &properties) {
   std::cout << "========================In createLinkInstance, about to get new tags" << "\n";
-  //    std::cout << "========================In createLinkInstance, about to call makeDynamicWords" << "\n";
-  //    DynamicWords dw = makeDynamicWords("/etc/race/wordlist.txt", 600);
-  //    std::cout << "========================In createLinkInstance, AFTER makeDynamicWords " << "\n";
-  //    int lwl = dw.l_word_list;
-  //    std::cout << "==========================l_word_list = " + std::to_string(lwl) + "\n";
-  //    lwl = dw.word_list.size();
-  //    dw.l_word_list = lwl;
-  //    std::cout << "==========================l_word_list = " + std::to_string(lwl) + "\n";
-    std::string out = getCurrentTags2(0);
+     std::cout << "========================In createLinkInstance, about to call makeDynamicWords" << "\n";
+     DynamicWords dw = makeDynamicWords("/kits/PluginDestini/wordlist.txt", 600);
+     std::cout << "========================In createLinkInstance, AFTER makeDynamicWords " << "\n";
+     int lwl = dw.l_word_list;
+     std::cout << "==========================l_word_list = " + std::to_string(lwl) + "\n";
+     lwl = dw.word_list.size();
+     dw.l_word_list = lwl;
+     std::cout << "==========================l_word_list = " + std::to_string(lwl) + "\n";
+    // std::string out = getCurrentTags2(0);
+    // std::string out = getCurrentTags(dw, 0);
+    std::string out = "#aardvark";
     std::cout << "========================In createLinkInstance, Dynamic tags: " << out << "\n";
     
     logDebug("in PluginTaTwoSixStubTransport::createLinkInstance before link creation");

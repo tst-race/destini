@@ -74,7 +74,7 @@
 # Function to define the component CMake target
 ################################################################################
 
-set(PLUGIN_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../plugin)
+set(PLUGIN_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../kit)
 set(COMMON_SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/common)
 file(GLOB_RECURSE COMMON_HEADERS CONFIGURE_DEPENDS ${COMMON_SRC_DIR}/*.h)
 
@@ -179,10 +179,10 @@ else()
     add_custom_command(
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini
         COMMAND ${CMAKE_COMMAND} -E make_directory ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini
-        # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/
-        # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/mjpg_simplex/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/mjpg_simplex/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/
+        # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/mjpg_simplex/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/
+        # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/mjpg_simplex/manifest.json ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-server/PluginDestini/
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/manifest.json
         OUTPUT
             ${PLUGIN_BASE_DIR}/artifacts/${NODE_TYPE}-client/PluginDestini/manifest.json
@@ -207,5 +207,4 @@ add_subdirectory(encoding)
 add_subdirectory(flickr_transport)
 add_subdirectory(mjpg_transport)
 add_subdirectory(mjpg_simplex)
-add_subdirectory(jel_encoding)
 add_subdirectory(video_encoding)

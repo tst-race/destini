@@ -110,7 +110,7 @@ public:
     return join(r, ",");
   }
 
-#define WORDLIST "./wordlist.txt"
+#define WORDLIST "/kits/PluginDestini/wordlist.txt"
   
   DynamicWords(const std::string& word_file, const std::string& static_word, int min_num_words, int max_num_words, long interval = 600) :
   //  secret_salt(std::abs(std::hash<std::string>{}(static_word)) % static_cast<int>(std::pow(10, 8))),
@@ -168,7 +168,7 @@ std::vector<std::string> get_words(DynamicWords *dw, long index = 0) {
 #ifdef TEST
 static DynamicWords __dw__ = DynamicWords("./wordlist.txt", "secret", 3, 5, 5);
 #else
-static DynamicWords __dw__ = DynamicWords("/etc/race/wordlist.txt", "secret", 3, 5, 600);
+static DynamicWords __dw__ = DynamicWords("/kits/PluginDestini/wordlist.txt", "secret", 3, 5, 5);
 #endif
 
 DynamicWords makeDynamicWords(std::string wfile, long interval) {
@@ -199,7 +199,7 @@ extern std::string getCurrentTags2(long index) {
 
 
 
-#define WORDLIST "./wordlist.txt"
+#define WORDLIST "/kits/PluginDestini/wordlist.txt"
 #define USE_JOIN 0
 
  int main(int argc, char* argv[]) {

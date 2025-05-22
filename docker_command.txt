@@ -1,1 +1,0 @@
-docker run --rm -v /homes/connolly/twosix/sri-race-plugins:/code -w /code --name plugin_builder_decomposed_cpp_ta2 ghcr.io/tst-race/private-race-core/race-sdk:main ./build_artifacts-hacked.sh

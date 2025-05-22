@@ -67,4 +67,4 @@ formatlog "INFO" "Removing previous build artifacts"
 rm -rf ${CURRENT_DIR}/build/*
 
 formatlog "INFO" "Cleaning artifacts in the plugin dir"
-rm -rf ${CURRENT_DIR}/plugin/artifacts/*
+rm -rf ${CURRENT_DIR}/kit/artifacts/*

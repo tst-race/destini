@@ -18,7 +18,7 @@ _logMsg "Entering..."
 
 BASE_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) >/dev/null 2>&1 && pwd)
 TOP_DIR="${BASE_DIR}/.."
-COVERS_TGZ="covers/sri-ta2.tar"
+COVERS_TGZ="jpeg-covers.tar"
 
 _logMsg "$BASE_DIR $TOP_DIR $COVERS_TGZ"
 
@@ -50,10 +50,9 @@ done
 _logMsg "Before tar -xf"
 
 tar -xf ${COVERS_TGZ}
-sed -i -Ee 's|^/ramfs/sriPixelfed/||' sri-ta2/covers/jpeg/capacities.txt
 
-find sri-ta2 -type d -exec chmod o+rx {} \;
-find sri-ta2 -type f -exec chmod o+r {} \;
+find jpeg-covers -type d -exec chmod o+rx {} \;
+find jpeg-covers -type f -exec chmod o+r {} \;
 
 touch .jel2_init_complete
 
