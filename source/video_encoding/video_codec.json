@@ -1,0 +1,20 @@
+{
+    "android_path": "/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/scripts/video_decomposed_codec_android.sh",
+    "path": "/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/scripts/video_decomposed_codec.sh",
+
+    "args": {
+	"common": "-bpf 1 -nfreqs 1 -maxfreqs 4 -jpeg_quality 75",
+        "encode": "-cover <coverfile>"
+    },
+
+    "media": {
+        "capacities": "/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/sri-ta2/covers/flickr/capacities.txt",
+        "maximum": 650000
+    },
+
+    "initCommand": "/bin/bash -c /etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/scripts/initialize_video.sh",
+
+    ".format": "Decomposed-TA2",
+    "mime-type": "video/mp4",
+    "encodingTime": 80.0
+}

@@ -1,0 +1,114 @@
+{
+    "plugins": [
+	{
+            "file_path": "PluginDestini",
+            "plugin_type": "TA2",
+            "file_type": "shared_library",
+            "node_type": "any",
+            "shared_library_path": "libPluginTA2SRIFlickrTransport.so",
+            "channels": [],
+            "transports": ["flickrDecomposed"],
+            "usermodels": [],
+            "encodings": []
+	},
+        {
+            "file_path": "PluginDestini",
+            "plugin_type": "TA2",
+            "file_type": "shared_library",
+            "node_type": "any",
+            "shared_library_path": "libPluginTA2SRI_VideoEncoding.so",
+            "channels": [],
+            "transports": [],
+            "usermodels": [],
+            "encodings": ["SRIVideoEncoding"]
+        },
+        {
+            "file_path": "PluginDestini",
+            "plugin_type": "TA2",
+            "file_type": "shared_library",
+            "node_type": "any",
+            "shared_library_path": "libPluginTA2SRI_MJPG_Simplex.so",
+            "channels": [],
+            "transports": ["MJPGDecomposed"],
+            "usermodels": [],
+            "encodings": []
+        },
+        {
+            "file_path": "PluginDestini",
+            "plugin_type": "TA2",
+            "file_type": "shared_library",
+            "node_type": "any",
+            "shared_library_path": "libPluginTA2SRICLIEncoding.so",
+            "channels": [],
+            "transports": [],
+            "usermodels": [],
+            "encodings": ["SRICLIEncoding"]
+        }
+    ],
+    "compositions": [
+        {
+            "id": "jelTwoSixIndirect",
+            "transport": "twoSixIndirect",
+            "usermodel": "rapidUser",
+            "encodings": ["SRICLIEncoding"]
+        },
+        {
+            "id": "videoTwoSixIndirect",
+            "transport": "twoSixIndirect",
+            "usermodel": "rapidUser",
+            "encodings": ["SRIVideoEncoding"]
+        },
+        {
+            "id": "jelMJPGServer",
+            "transport": "MJPGDecomposed",
+            "usermodel": "rapidUser",
+            "encodings": ["noop"]
+        },
+        {
+            "id": "jelMJPGClient",
+            "transport": "MJPGDecomposed",
+            "usermodel": "rapidUser",
+            "encodings": ["noop"]
+        },
+        {
+            "id": "jelFlickr",
+            "transport": "flickrDecomposed",
+            "usermodel": "rapidUser",
+            "encodings": ["SRICLIEncoding"]
+        }	
+    ],
+    "channel_properties" : {
+	"jelTwoSixIndirect": {
+	    "channelGid": "jelTwoSixIndirect",
+	    "connectionType": "CT_INDIRECT",
+	    "linkDirection": "LD_BIDI",
+	    "transmissionType": "TT_MULTICAST"
+	},
+        "videoTwoSixIndirect": {
+	    "channelGid": "jelTwoSixIndirect",
+	    "connectionType": "CT_INDIRECT",
+	    "linkDirection": "LD_BIDI",
+	    "transmissionType": "TT_MULTICAST"
+	},
+            "jelMJPGServer": {
+	    "channelGid": "jelMJPGServer",
+	    "connectionType": "CT_INDIRECT",
+	    "linkDirection": "LD_CREATOR_TO_LOADER",
+	    "transmissionType": "TT_UNICAST"
+	},
+	"jelMJPGClient": {
+	    "channelGid": "jelMJPGClient",
+	    "connectionType": "CT_INDIRECT",
+	    "linkDirection": "LD_LOADER_TO_CREATOR",
+	    "transmissionType": "TT_UNICAST"
+	},
+	"jelFlickr": {
+	    "channelGid": "jelFlickr",
+	    "connectionType": "CT_INDIRECT",
+	    "linkDirection": "LD_LOADER_TO_CREATOR",
+	    "transmissionType": "TT_UNICAST"
+	}
+    },
+    "channel_parameters" : [
+    ]
+}

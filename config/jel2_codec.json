@@ -1,0 +1,17 @@
+{
+	".format": "Decomposed-TA2",
+
+    "android_path": "/data/data/com.twosix.race/race/artifacts/ta2/PluginTA2SRIPixelfed/scripts/jel2_codec_android.sh",
+    "args": {
+        "common": "-seed <secret> -bpf 1 -nfreqs 1 -maxfreqs 6",
+        "encode": "<coverfile>"
+    },
+    "media": {
+        "android_capacities": "/data/data/com.twosix.race/race/artifacts/ta2/PluginTA2SRIPixelfed/covers/jpeg/android_capacities.txt",
+        "capacities": "/ramfs/sriPixelfed/sri-ta2/covers/jpeg/capacities.txt",
+        "maximum": 3000
+    },
+    "mime-type": "image/jpeg",
+    "path": "/usr/local/lib/race/ta2/PluginTA2SRIPixelfed/scripts/jel2_codec.sh",
+    "encodingTime": 10000
+}
