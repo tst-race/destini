@@ -1,96 +1,42 @@
-# sri-race-plugins  --  RACE Plugins for SRI
+# Destini
 
-Under 'source', you will find RACEBOAT plugins for JPEG steg
-('source/encodings'), Flickr transport ('source/flickr_transport'),
-and mjpeg_streamer transport ('source/mjpg_transport').
+Destini is a set of Encoding and Transport component plugins for use with the [Raceboat](https://github.com/tst-race/raceboat) framework. This repo includes code for:
 
-## Dependencies
+* A Transport component (flickrDecomposed) that uses the Flickr service to move data via images.
 
-The following apt-get dependencies are needed for building the SRI
-plugins:
+* A Transport component (MJPGDecomposed) that streams data directly to a client via steganography in a motion-JPEG stream.
 
-	apt-get -y install libthrift-dev
-	apt-get -y install libjpeg62-dev
-	apt-get -y install libjsoncpp-dev
-	apt-get -y install libevent-dev
-	apt-get -y install libboost-all-dev
-	apt-get -y install libcpprest-dev
-	apt-get -y install libxml2-dev
-	apt-get -y install parallel
-	apt-get -y install psutil
-	apt-get -y install ffmpeg
-	
+* An Encoding component (SRIVideoEncoding) that steganographically encodes data into MJPG files
 
-You will need to create a softlink for libxml:
+* An Encoding component (SRICLIEncoding) that steganographically encodes data into JPEG files
 
-    pushd /usr/local/include
-    ls /usr/include
-    ln -s /usr/include/libxml2/libxml
-    popd
+## Current Status
 
+Only the image encoding, SRICLIEncoding, has been verified to work with the current Raceboat framework, using the [decomposed exemplar](https://github.com/tst-race/decomposed-exemplars) redis-based Transport (twoSixIndirect) and user models (rapidUser) as the other components.
 
+## Building
 
-Python dependencies are here:
+Destini can be built for x86-64 architectures via a one-step dockerized build script.
 
-       pip install pillow
+```
+git clone https://github.com/tst-race/destini.git
 
+cd destini
 
-You will also need to build and install the veil libraries and python
-modules (see https://www.github.com/yegnev/veil).
+./build_artifacts_in_docker_image.sh
 
-## Build
+```
 
-To build the plugins, run the race-sdk docker container with /code mapped to
-a directory containing both sri-race-plugins (this repo) and race-core
-as siblings.  For example, suppose the parent directory is called
-'/opt/projects/RACE/twosix'.  Start the container with the command
-line switches:
+This will take some time because while the build uses the raceboat-plugin-builder image, it additionally installs several development dependencies before actually building the Destini code. The script will output a `kit/linux-x86_64-server/PluginDestini` directory. This directory contains the plugins, manifest, and necessary local scripts, executables, and data for running Destini.
 
-	   "-v /opt/projects/RACE/twosix:/code -w /code"
+## Using
 
+Copy the `PluginDestini` directory to a directory structure alongside `PluginCommsTwoSixStubDecomposed` (from [decomposed-exemplars](https://github.com/tst-race/decomposed-exemplars) since those plugins will be necessary for providing the Transport and User Model.
 
-Then we should see these in the container:
+Specify the channel as `jelTwoSixIndirect` to use a composed channel consisting othe `twoSixIndirect` transport, which uses redis, `rapidUser`, which provides a high activity model of post and fetch actions, and `SRICLIEncoding` which steganographically encodes data into images that are then posted through redis.
 
-	   /code/sri-race-plugins
-	   /code/race-core
+## Known Issues
 
+The `jelTwoSixIndirect` composition appears to truncate messages longer than 4094B to 4094B. 
 
-Assuming that race-core has been built and installed in this
-container, you can build the SRI plugins by invoking the build.sh
-script:
-
-	cd /code/sri-race-plugins
-	bash build.sh
-	bash install.sh
-
-This should install the third-party flickcurl library, build and
-install the SRI plugins, and install Flickr authentication
-information.
-
-## Staging in /etc/race
-
-Shared objects and data files for the RaceBoat plugin will need to be
-staged in the /etc/race directory within the docker container.  You
-can use the "stage.sh" script to place shared libraries and
-authentication files in the appropriate places.
-
-
-## Testing
-
-The race-cli utility can be used to test the plugins by sending and
-receiving messages through Flickr via the "jelFlickr" channel.  The
-send and recv addresses should contain a "user" key that can have a
-value between "user1" and "user6" inclusive.
-
-These user names are keys for accessing authentication information for
-distinct users.  The master JSON file for authentication is in
-"source/flickr_transport/flickr_auth/rw_auth.json".
-
-To send a message:
-
-   	race-cli  --send  --send-channel=jelFlickr --send-address='{"hashtag":"client-to-server","hostname":"twosix-whiteboard","port":5000,"user":"user1"}'
-
-To receive the message (within 1/2 hour of sending):
-
-   	race-cli  --recv  --recv-channel=jelFlickr --recv-address='{"hashtag":"client-to-server","hostname":"twosix-whiteboard","maxTries":120,"port":5000,"timestamp":0.0,"user":"user2"}' --num-packages=1
 
