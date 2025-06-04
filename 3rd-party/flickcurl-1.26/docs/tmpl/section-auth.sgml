@@ -1,0 +1,297 @@
+<!-- ##### SECTION Title ##### -->
+Authentication
+
+<!-- ##### SECTION Short_Description ##### -->
+Authentication of web service requests
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+Authentication of web service requests
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### FUNCTION flickcurl_get_api_key ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_api_key ##### -->
+<para>
+
+</para>
+
+@fc: 
+@api_key: 
+
+
+<!-- ##### FUNCTION flickcurl_get_shared_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_shared_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@secret: 
+
+
+<!-- ##### FUNCTION flickcurl_get_auth_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_auth_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@auth_token: 
+
+
+<!-- ##### FUNCTION flickcurl_auth_checkToken ##### -->
+<para>
+
+</para>
+
+@fc: 
+@token: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_auth_getFrob ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_auth_getFullToken ##### -->
+<para>
+
+</para>
+
+@fc: 
+@frob: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_auth_getToken ##### -->
+<para>
+
+</para>
+
+@fc: 
+@frob: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_auth_oauth_getAccessToken ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### VARIABLE flickcurl_flickr_oauth_access_token_uri ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE flickcurl_flickr_oauth_authorize_uri ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### VARIABLE flickcurl_flickr_oauth_request_token_uri ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_client_key ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_oauth_client_key ##### -->
+<para>
+
+</para>
+
+@fc: 
+@client_key: 
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_client_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_oauth_client_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@client_secret: 
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_request_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_oauth_request_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@token: 
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_request_token_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_oauth_request_token_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@secret: 
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_oauth_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@token: 
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_token_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_set_oauth_token_secret ##### -->
+<para>
+
+</para>
+
+@fc: 
+@secret: 
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_username ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_get_oauth_user_nsid ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_oauth_create_request_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@callback: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_oauth_get_authorize_uri ##### -->
+<para>
+
+</para>
+
+@fc: 
+@Returns: 
+
+
+<!-- ##### FUNCTION flickcurl_oauth_create_access_token ##### -->
+<para>
+
+</para>
+
+@fc: 
+@verifier: 
+@Returns: 
+
+

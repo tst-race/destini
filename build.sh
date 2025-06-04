@@ -128,32 +128,31 @@ if [ -z "$(ls ${BASE_DIR}/cmake/*)" ]; then
     exit 1
 fi
 
-# PAUL COMMENTED OUT TO SPEED UP BUILD
-# apt-get -y update
-# apt-get -y install libboost-all-dev
-# apt-get -y install libcpprest-dev
-# apt-get -y install libxml2-dev
-# apt-get -y install libjsoncpp-dev
-# apt-get -y install libjpeg62-dev
-# apt-get -y install libevent-dev
+apt-get -y update
+apt-get -y install libboost-all-dev
+apt-get -y install libcpprest-dev
+apt-get -y install libxml2-dev
+apt-get -y install libjsoncpp-dev
+apt-get -y install libjpeg62-dev
+apt-get -y install libevent-dev
 # # RISKY!  Do we know that this version has everything we need??
-# apt-get -y install ffmpeg
-# apt-get -y install parallel
+apt-get -y install ffmpeg
+apt-get -y install parallel
 
-# pip install pillow
-# pip install psutil
-# / PAUL COMMENTED OUT TO SPEED UP BUILD
+pip install pillow
+pip install psutil
 
-#pushd /usr/local/include
-#ls /usr/include
-#ln -s /usr/include/libxml2/libxml
-#popd
+pushd /usr/local/include
+ls /usr/include
+ln -s /usr/include/libxml2/libxml
+popd
 
-# pushd 3rd-party/flickcurl-1.26
-# make install
-# popd
+pushd 3rd-party/flickcurl-1.26
+make install
+popd
 
 #cp /code/external/flickcurl-1.26/src/.libs/libflickcurl.so.0.0.0 /usr/local/lib/libflickcurl.so
+# cp /code/libflickcurl.so /usr/local/lib/libflickcurl.so
 #cp /code/external/flickcurl-1.26/src/.libs/libflickcurl.so.0.0.0 /etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/libflickcurl.so
 
 
