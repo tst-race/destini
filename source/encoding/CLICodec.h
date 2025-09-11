@@ -47,6 +47,8 @@ class MediaPaths
  public:
   unsigned int size () {return _activeMediaPaths.size ();};
   MediaPathPtr getRandom ();
+  size_t writeJsonFile(const std::string& filename, const Json::Value& root)
+  void writeJsonFile(const std::string& filename, const Json::Value& root);
   size_t       minCapacity    () {return _minCapacity;}
   size_t       maxCapacity    () {return _maxCapacity;}
   double       avgCapacity    () {return _avgCapacity;}

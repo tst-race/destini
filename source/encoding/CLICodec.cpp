@@ -21,6 +21,7 @@
 #include <sys/wait.h>
 
 #include <event2/event.h>
+#include <json/json.h>
 
 #include "StringUtility.h"
 #include "CLICodec.h"
@@ -274,6 +275,52 @@ MediaPaths::getRandom ()
   return nullptr;
 }
 
+  size_t MediaPaths::executeWcap(const std::string& filepath) {
+    _RunCodec runCodec;
+    void* pMsgOut = nullptr;
+    size_t nMsgOut = 0;
+    
+    // Execute wcap command
+    std::string args = filepath;
+    auto retVal = runCodec.run("wcap", args, "", 0, &pMsgOut, &nMsgOut);
+    
+    if (retVal == 0 && pMsgOut && nMsgOut > 0) {
+      // Parse the output to get capacity value
+      std::string output(static_cast<char*>(pMsgOut), nMsgOut);
+      free(pMsgOut);
+      
+      // Trim whitespace and convert to number
+      output.erase(output.find_last_not_of(" \n\r\t") + 1);
+      
+      try {
+        return static_cast<size_t>(std::stoul(output));
+      } catch (const std::exception& e) {
+        _SS_DIAGPRINT("MediaPaths::executeWcap(): Failed to parse capacity: " << output);
+        return 0;
+      }
+    }
+    
+    if (pMsgOut) {
+      free(pMsgOut);
+    }
+    
+    _SS_DIAGPRINT("MediaPaths::executeWcap(): wcap failed with return code " << retVal);
+    return 0;
+  }
+  
+  void MediaPaths::writeJsonFile(const std::string& filename, const Json::Value& root) {
+    std::ofstream outFile(filename);
+    if (outFile.is_open()) {
+      Json::StreamWriterBuilder builder;
+      builder["indentation"] = "  "; // Pretty print with 2-space indentation
+      std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+      writer->write(root, &outFile);
+      outFile.close();
+      _SS_DIAGPRINT("MediaPaths(): Updated JSON file: " << filename);
+    } else {
+      _SS_DIAGPRINT("MediaPaths(): Failed to write JSON file: " << filename);
+    }
+  }
   static void
 _cleanUp (std::vector<MediaPathPtr> mediaPaths)
 {
