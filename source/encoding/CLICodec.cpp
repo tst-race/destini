@@ -132,90 +132,122 @@ MediaPath::MediaPath (const std::string &path, size_t capacity): _mediaPath (pat
 }
 
 
-MediaPaths::MediaPaths (const std::string &mediaCapacities, size_t maxCapacity)
+MediaPaths::MediaPaths (const std::string &mediaCapacitiesJson, size_t maxCapacity)
 {
   _minCapacity   = maxCapacity;
   _maxCapacity   = 0;
 
-  if (fileExists (mediaCapacities)) {
-
-    // https://www.tutorialspoint.com/read-file-line-by-line-using-cplusplus
-
-    std::ifstream inFile;
-
-    inFile.open (mediaCapacities);
-
-    if (inFile.is_open ()) {
-      double _sumCapacity   = 0.0;
+  if (fileExists (mediaCapacitiesJson)) {
+    std::ifstream inFile(mediaCapacitiesJson);
+    
+    if (inFile.is_open()) {
+      Json::Value root;
+      Json::Reader reader;
+      
+      if (!reader.parse(inFile, root)) {
+        _SS_DIAGPRINT("MediaPaths(): Failed to parse JSON file: " << reader.getFormattedErrorMessages());
+        inFile.close();
+        return;
+      }
+      
+      inFile.close();
+      
+      if (!root.isArray()) {
+        _SS_DIAGPRINT("MediaPaths(): JSON root is not an array");
+        return;
+      }
+      
+      bool needsUpdate = false;
+      double _sumCapacity = 0.0;
       double _sumSqCapacity = 0.0;
-      double _numLines      = 0.0;
-      std::string tp;
-      #define     _TAB_CSEP "\t"
-
-      while (getline (inFile, tp)) {
-        auto    cStr     = strdup (tp.c_str ());
-        auto    current  = strtok (cStr, _TAB_CSEP);
-        char   *pPath    = nullptr;
-        size_t  capacity = 0;
-        std::string path;
-
-        while (current /* != NULL */) {
-          if (pPath == nullptr) {
-            pPath = current;
-            path  = std::string (pPath);
-          }
-          else {
-            capacity = static_cast <size_t> (atoi (current));
-            break;
-          }
-
-          current = strtok (nullptr, _TAB_CSEP);
+      double _numLines = 0.0;
+      
+      // Process each entry in the JSON array
+      for (Json::Value::ArrayIndex i = 0; i < root.size(); ++i) {
+        Json::Value& entry = root[i];
+        
+        if (!entry.isObject()) {
+          _SS_DIAGPRINT("MediaPaths(): Array entry " << i << " is not an object");
+          continue;
         }
-
-        if (!fileExists (path))
-          path = CLICodec::DirFilename (path);
-
-        if (fileExists (path) && capacity /* > 0 */) {
+        
+        // Get filepath
+        if (!entry.isMember("filepath") || !entry["filepath"].isString()) {
+          _SS_DIAGPRINT("MediaPaths(): Entry " << i << " missing or invalid filepath");
+          continue;
+        }
+        
+        std::string filepath = entry["filepath"].asString();
+        
+        // Check if file exists, try with DirFilename if not
+        if (!fileExists(filepath)) {
+          filepath = CLICodec::DirFilename(filepath);
+        }
+        
+        if (!fileExists(filepath)) {
+          _SS_DIAGPRINT("MediaPaths(): File not found: " << entry["filepath"].asString());
+          continue;
+        }
+        
+        size_t capacity = 0;
+        
+        // Check if capacity exists
+        if (entry.isMember("capacity") && entry["capacity"].isNumeric()) {
+          capacity = static_cast<size_t>(entry["capacity"].asUInt());
+        } else {
+          // Execute wcap to get capacity
+          capacity = executeWcap(filepath);
+          if (capacity > 0) {
+            entry["capacity"] = static_cast<Json::UInt>(capacity);
+            needsUpdate = true;
+            _SS_DIAGPRINT("MediaPaths(): Added capacity " << capacity << " for " << filepath);
+          } else {
+            _SS_DIAGPRINT("MediaPaths(): Failed to get capacity for " << filepath);
+            continue;
+          }
+        }
+        
+        if (capacity > 0) {
           ++_numLines;
-
-          if (maxCapacity /* > 0 */ && capacity > maxCapacity)
+          
+          // Apply max capacity limit
+          if (maxCapacity > 0 && capacity > maxCapacity) {
             capacity = maxCapacity;
-
-          if (_minCapacity /* > 0 */ && capacity < _minCapacity)
-              _minCapacity = capacity;
-
-          if (capacity > _maxCapacity)
-                  _maxCapacity = capacity;
-
-          _sumCapacity   += capacity;
-          _sumSqCapacity += static_cast <double> (capacity * capacity);
-
-          _activeMediaPaths.push_back (new MediaPath (path, capacity));
+          }
+          
+          // Update min/max tracking
+          if (_minCapacity > 0 && capacity < _minCapacity) {
+            _minCapacity = capacity;
+          }
+          
+          if (capacity > _maxCapacity) {
+            _maxCapacity = capacity;
+          }
+          
+          _sumCapacity += capacity;
+          _sumSqCapacity += static_cast<double>(capacity * capacity);
+          
+          _activeMediaPaths.push_back(new MediaPath(filepath, capacity));
         }
-#if defined (_DIAGPRINT_)
-        else {
-          _SS_DIAGPRINT ("MediaPaths (): \"" << path << "\" not found"
-                         " or bad or missing capacity (" << capacity << ")");
-        }
-#endif
-        free (cStr);
       }
-
-      #undef _TAB_CSEP
-
-      inFile.close ();
-
+      
+      // Write back updated JSON if needed
+      if (needsUpdate) {
+        writeJsonFile(mediaCapacitiesJson, root);
+      }
+      
+      // Calculate statistics
       if (_numLines > 0.0) {
-        _avgCapacity    = _sumCapacity / _numLines;
-        _stdDevCapacity = std::sqrt (_sumSqCapacity / _numLines - _avgCapacity * _avgCapacity);
-
-        _SS_DIAGPRINT ("MediaPaths () count: " << static_cast <size_t> (_numLines) <<
-                       " min/max: " << _minCapacity << "/" << _maxCapacity <<
-                       " avg/std: " << _avgCapacity << "/" << _stdDevCapacity);
+        _avgCapacity = _sumCapacity / _numLines;
+        _stdDevCapacity = std::sqrt(_sumSqCapacity / _numLines - _avgCapacity * _avgCapacity);
+        
+        _SS_DIAGPRINT("MediaPaths() count: " << static_cast<size_t>(_numLines) <<
+                     " min/max: " << _minCapacity << "/" << _maxCapacity <<
+                     " avg/std: " << _avgCapacity << "/" << _stdDevCapacity);
       }
-
+      
       #if defined (_TIME_LSEED48_)
-      srand48 (time (nullptr));   // impacts MediaPaths::getRandom () lrand48 () calls
+      srand48(time(nullptr));
       #endif
     }
   }
