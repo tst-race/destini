@@ -147,15 +147,6 @@ ls /usr/include
 ln -s /usr/include/libxml2/libxml
 popd
 
-pushd 3rd-party/flickcurl-1.26
-make install
-popd
-
-#cp /code/external/flickcurl-1.26/src/.libs/libflickcurl.so.0.0.0 /usr/local/lib/libflickcurl.so
-# cp /code/libflickcurl.so /usr/local/lib/libflickcurl.so
-#cp /code/external/flickcurl-1.26/src/.libs/libflickcurl.so.0.0.0 /etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/libflickcurl.so
-
-
 formatlog "INFO" "Cleaning plugin/artifacts Before Building Artifacts"
 bash ${BASE_DIR}/clean_artifacts.sh
 
