@@ -1,2 +1,0 @@
-These .ini files authenticate to Flickr for each user.  They should be
-copied to /etc/race in the container.  See stage-sri-plugins.sh.

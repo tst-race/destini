@@ -2,10 +2,6 @@
 
 Destini is a set of Encoding and Transport component plugins for use with the [Raceboat](https://github.com/tst-race/raceboat) framework. This repo includes code for:
 
-* A Transport component (flickrDecomposed) that uses the Flickr service to move data via images.
-
-* A Transport component (MJPGDecomposed) that streams data directly to a client via steganography in a motion-JPEG stream.
-
 * An Encoding component (SRIVideoEncoding) that steganographically encodes data into MJPG files
 
 * An Encoding component (SRICLIEncoding) that steganographically encodes data into JPEG files
