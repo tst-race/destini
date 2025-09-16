@@ -45,7 +45,7 @@ class MediaPaths
   std::string _jsonFilePath;  // Store JSON file path for recalculation
 
  protected:
-  explicit     MediaPaths (const std::string &wcapPath, const std::string &mediaCapacities, size_t maxCapacity = 0);
+  explicit     MediaPaths (const std::string &wcapPath, const std::string &mediaCapacities, size_t maxCapacity = 0, bool forceRecalculation = false);
   void         cleanUp ();
   friend class CLICodec;
 

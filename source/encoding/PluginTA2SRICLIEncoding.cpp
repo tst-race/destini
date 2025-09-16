@@ -113,7 +113,7 @@ EncodingProperties PluginTA2SRICLIEncoding::getEncodingProperties() {
     return {cliCodec->encodingTime (), cliCodec->mimeType ()};
 }
 
-EncodingProperties PluginTA2SRICLIEncoding::getEncodingPropertiesForParameters(const EncodingParameters &params) {
+SpecificEncodingProperties PluginTA2SRICLIEncoding::getEncodingPropertiesForParameters(const EncodingParameters &params) {
     TRACE_SRI_METHOD(params.type, params.linkId);
     
     // Get the actual minimum capacity from MediaPaths instead of hardcoded 3000
@@ -121,7 +121,7 @@ EncodingProperties PluginTA2SRICLIEncoding::getEncodingPropertiesForParameters(c
     
     logDebug("PluginTA2SRICLIEncoding::getEncodingPropertiesForParameters: Using capacity " + std::to_string(capacity));
     
-    return EncodingProperties(capacity);
+    return {static_cast <int32_t>(capacity)};
 }
 
 size_t PluginTA2SRICLIEncoding::getMinimumCapacity() const {

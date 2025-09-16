@@ -200,7 +200,7 @@ MediaPaths::MediaPaths (const std::string &wcapPath, const std::string &mediaCap
           _SS_DIAGPRINT("MediaPaths(): Using existing capacity " << capacity << " for " << filepath);
         } else {
           // Execute wcap to get capacity - now with stored wcapPath
-          capacity = executeWcap(filepath);
+          capacity = executeWcap(_wcapPath, filepath);
           if (capacity > 0) {
             entry["capacity"] = static_cast<Json::UInt>(capacity);
             needsUpdate = true;
