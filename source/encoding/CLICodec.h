@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <event2/event.h>
+
 #ifdef __ANDROID__
 #include <json/json.h>
 #else
@@ -40,14 +42,14 @@ class MediaPaths
   double                    _stdDevCapacity;
 
  protected:
-  explicit     MediaPaths (const std::string &mediaCapacities, size_t maxCapacity = 0);
+  explicit     MediaPaths (const std::string &wcapPath, const std::string &mediaCapacities, size_t maxCapacity = 0);
   void         cleanUp ();
   friend class CLICodec;
 
  public:
   unsigned int size () {return _activeMediaPaths.size ();};
   MediaPathPtr getRandom ();
-  size_t writeJsonFile(const std::string& filename, const Json::Value& root)
+  size_t executeWcap(const std::string& wcapPath, const std::string& filepath);
   void writeJsonFile(const std::string& filename, const Json::Value& root);
   size_t       minCapacity    () {return _minCapacity;}
   size_t       maxCapacity    () {return _maxCapacity;}
@@ -59,6 +61,52 @@ class MediaPaths
 
 typedef MediaPaths *MediaPathsPtr;
 
+class _RunCodec
+{
+ private:
+  static struct event *_freeEvent (struct event *pEvent);
+
+  static void EventOutCB   (evutil_socket_t fd, short what, void *arg);
+  static void EventInOutCB (evutil_socket_t fd, short what, void *arg);
+  static void EventInErrCB (evutil_socket_t fd, short what, void *arg);
+  static void _EventInFn   (_RunCodec *runCodec, evutil_socket_t fd,
+                            char **pIn, size_t *nIn, size_t *nextIn, size_t *capIn);
+  const char *_pMsgIn;
+  size_t      _nMsgIn;
+
+  char      **_pMsgOut;
+  size_t     *_nMsgOut;
+  size_t      _nextOut;
+  size_t      _capOut;
+
+  char       *_pError;
+  size_t      _nError;
+  size_t      _nextErr;
+  size_t      _capError;
+
+  int         _rwepipe[3];
+  int         _pid;
+
+  int         _status;
+  int         _pidStatus;
+
+  struct event *_evIn;
+  struct event *_evOut;
+  struct event *_evErr;
+
+  void _freeEVIn ();
+  void _endLibevent ();
+
+ public:
+  explicit _RunCodec ();
+  ~_RunCodec ();
+
+  int run (std::string codecPath, std::string args,
+           const void  *pMsgIn,  size_t  nMsgIn,
+           void        *pMsgOut, size_t *nMsgOut);
+
+  std::string error ();
+};
 
 class CLICodec
 {

@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -20,8 +21,8 @@
 #include <sys/stat.h>   /* stat, chmod */
 #include <sys/wait.h>
 
+#include <unistd.h>
 #include <event2/event.h>
-#include <json/json.h>
 
 #include "StringUtility.h"
 #include "CLICodec.h"
@@ -133,7 +134,7 @@ MediaPath::MediaPath (const std::string &path, size_t capacity): _mediaPath (pat
 }
 
 
-MediaPaths::MediaPaths (const std::string &mediaCapacitiesJson, size_t maxCapacity)
+MediaPaths::MediaPaths (const std::string &wcapPath, const std::string &mediaCapacitiesJson, size_t maxCapacity)
 {
   _minCapacity   = maxCapacity;
   _maxCapacity   = 0;
@@ -197,7 +198,7 @@ MediaPaths::MediaPaths (const std::string &mediaCapacitiesJson, size_t maxCapaci
           capacity = static_cast<size_t>(entry["capacity"].asUInt());
         } else {
           // Execute wcap to get capacity
-          capacity = executeWcap(filepath);
+          capacity = executeWcap(wcapPath, filepath);
           if (capacity > 0) {
             entry["capacity"] = static_cast<Json::UInt>(capacity);
             needsUpdate = true;
@@ -275,38 +276,39 @@ MediaPaths::getRandom ()
   return nullptr;
 }
 
-  size_t MediaPaths::executeWcap(const std::string& filepath) {
-    _RunCodec runCodec;
-    void* pMsgOut = nullptr;
-    size_t nMsgOut = 0;
-    
-    // Execute wcap command
-    std::string args = filepath;
-    auto retVal = runCodec.run("wcap", args, "", 0, &pMsgOut, &nMsgOut);
-    
-    if (retVal == 0 && pMsgOut && nMsgOut > 0) {
-      // Parse the output to get capacity value
-      std::string output(static_cast<char*>(pMsgOut), nMsgOut);
-      free(pMsgOut);
-      
-      // Trim whitespace and convert to number
-      output.erase(output.find_last_not_of(" \n\r\t") + 1);
-      
-      try {
-        return static_cast<size_t>(std::stoul(output));
-      } catch (const std::exception& e) {
-        _SS_DIAGPRINT("MediaPaths::executeWcap(): Failed to parse capacity: " << output);
+size_t MediaPaths::executeWcap(const std::string& wcapPath, const std::string& filepath) {
+    std::string command = wcapPath + " \"" + filepath + "\"";
+
+    FILE* pipe = popen(command.c_str(), "r");
+    if (!pipe) {
+        _SS_DIAGPRINT("MediaPaths::executeWcap(): Failed to open pipe for wcap");
         return 0;
-      }
     }
-    
-    if (pMsgOut) {
-      free(pMsgOut);
+        
+    char buffer[128];
+    std::string result;
+        
+    while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+        result += buffer;
     }
-    
-    _SS_DIAGPRINT("MediaPaths::executeWcap(): wcap failed with return code " << retVal);
-    return 0;
-  }
+        
+    int returnCode = pclose(pipe);
+        
+    if (returnCode != 0) {
+        _SS_DIAGPRINT("MediaPaths::executeWcap(): wcap failed with return code " << returnCode);
+        return 0;
+    }
+        
+    // Trim whitespace and convert to number
+    result.erase(result.find_last_not_of(" \n\r\t") + 1);
+        
+    try {
+      return static_cast<size_t>(std::stoul(result)) - 50; // HACK: wcap overestimates and doesn't account for an encoding header
+    } catch (const std::exception& e) {
+        _SS_DIAGPRINT("MediaPaths::executeWcap(): Failed to parse capacity: " << result);
+        return 0;
+    }
+} 
   
   void MediaPaths::writeJsonFile(const std::string& filename, const Json::Value& root) {
     std::ofstream outFile(filename);
@@ -352,54 +354,6 @@ _replaceStrings (StringList sList, ReplaceMap replaceMap)
 
   return retList;
 }
-
-  class
-_RunCodec
-{
- private:
-  static struct event *_freeEvent (struct event *pEvent);
-
-  static void EventOutCB   (evutil_socket_t fd, short what, void *arg);
-  static void EventInOutCB (evutil_socket_t fd, short what, void *arg);
-  static void EventInErrCB (evutil_socket_t fd, short what, void *arg);
-  static void _EventInFn   (_RunCodec *runCodec, evutil_socket_t fd,
-                            char **pIn, size_t *nIn, size_t *nextIn, size_t *capIn);
-  const char *_pMsgIn;
-  size_t      _nMsgIn;
-
-  char      **_pMsgOut;
-  size_t     *_nMsgOut;
-  size_t      _nextOut;
-  size_t      _capOut;
-
-  char       *_pError;
-  size_t      _nError;
-  size_t      _nextErr;
-  size_t      _capError;
-
-  int         _rwepipe[3];
-  int         _pid;
-
-  int         _status;
-  int         _pidStatus;
-
-  struct event *_evIn;
-  struct event *_evOut;
-  struct event *_evErr;
-
-  void _freeEVIn ();
-  void _endLibevent ();
-
- public:
-  explicit _RunCodec ();
-  ~_RunCodec ();
-
-  int run (std::string codecPath, std::string args,
-           const void  *pMsgIn,  size_t  nMsgIn,
-           void        *pMsgOut, size_t *nMsgOut);
-
-  std::string error ();
-};
 
 _RunCodec::_RunCodec ():
   _pMsgIn (nullptr),
@@ -704,6 +658,7 @@ class _PassThruCodec: public CLICodec
 #define _CODEC_MIME_TYPE_KEY    "mime-type"
 #define _CODEC_ENC_TIME_KEY     "encodingTime"
 #define _CODEC_PATH_KEY         "path"
+#define _CODEC_WCAP_PATH_KEY         "wcap_path"
 #define _CODEC_AND_PATH_KEY     "android_path"
 #define _CODEC_INIT_CMD_KEY     "initCommand"
 #define _CODEC_AND_MKSH         "/system/bin/sh"
@@ -1121,10 +1076,12 @@ CLICodec::CLICodec (Json::Value jRoot):
 
     // "media":{"capacities", "maximum"}
 
+    auto wcapPath = _getJSONString (jMedia, _CODEC_WCAP_PATH_KEY);
+    _SS_DIAGPRINT ("Wcap Path: " + wcapPath + "\n")
     auto capacitiesPath = DirFilename (_getJSONString (jMedia, _CODEC_CAPACITY_KEY));
     auto maxCapacity    = static_cast <size_t> (_getJSONInt (jMedia, _CODEC_MAX_CAP_KEY, 0));
 
-    _mediaPaths = new MediaPaths (capacitiesPath, maxCapacity);
+    _mediaPaths = new MediaPaths (wcapPath, capacitiesPath, maxCapacity);
 
     _isGood     = _mediaPaths->isGood ();
 
