@@ -41,6 +41,9 @@ class MediaPaths
   double                    _avgCapacity;
   double                    _stdDevCapacity;
 
+  std::string _wcapPath;  // Store the wcap executable path
+  std::string _jsonFilePath;  // Store JSON file path for recalculation
+
  protected:
   explicit     MediaPaths (const std::string &wcapPath, const std::string &mediaCapacities, size_t maxCapacity = 0);
   void         cleanUp ();
@@ -57,6 +60,10 @@ class MediaPaths
   double       stdDevCapacity () {return _stdDevCapacity;}
 
   bool isGood () {return size () /* > 0 */;};
+
+  // Add methods for capacity management
+  size_t getMinCapacity() const { return _minCapacity; }
+  void recalculateCapacities(const std::string& commonArgs);
 };
 
 typedef MediaPaths *MediaPathsPtr;
@@ -131,6 +138,12 @@ class CLICodec
   bool          _isGood;
   bool          _isAndroid;
 
+  // Add new members for argument overrides
+  std::string _overrideCommonArgs;
+  std::string _overrideEncodeArgs;
+  bool _hasCommonArgsOverride;
+  bool _hasEncodeArgsOverride;
+
   int           _runCodec (std::string args,
                            void  *pMsgIn,  size_t  nMsgIn,
                            void **pMsgOut, size_t *nMsgOut,
@@ -175,6 +188,14 @@ class CLICodec
   void setSecret (const std::string &host1, const std::string &host2);
   void setSecret (uint32_t ip1, uint32_t ip2);
   void setSecret (uint32_t secret);
+
+  // Add new method for setting argument overrides
+  void setArgumentOverrides(const std::string& commonArgs, 
+                            bool hasCommonOverride);
+
+  // Add methods for capacity management
+  size_t getMinimumCapacity() const;
+  void recalculateCapacities(const std::string& commonArgs);
 
   bool isGood () {return _isGood;};
 };

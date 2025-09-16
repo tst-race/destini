@@ -8,7 +8,7 @@
     },
 
     "media": {
-        "wcap_path": "/server-kits/PluginDestini/bin/wcap",
+        "wcap_path": "bin/wcap",
         "capacities": "jpeg-covers/capacities.txt",
         "maximum": 3000
     },

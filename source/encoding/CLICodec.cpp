@@ -134,7 +134,8 @@ MediaPath::MediaPath (const std::string &path, size_t capacity): _mediaPath (pat
 }
 
 
-MediaPaths::MediaPaths (const std::string &wcapPath, const std::string &mediaCapacitiesJson, size_t maxCapacity)
+MediaPaths::MediaPaths (const std::string &wcapPath, const std::string &mediaCapacitiesJson, size_t maxCapacity, bool forceRecalculate)
+  : _wcapPath(wcapPath), _jsonFilePath(mediaCapacitiesJson)  // Store both paths
 {
   _minCapacity   = maxCapacity;
   _maxCapacity   = 0;
@@ -194,15 +195,17 @@ MediaPaths::MediaPaths (const std::string &wcapPath, const std::string &mediaCap
         size_t capacity = 0;
         
         // Check if capacity exists
-        if (entry.isMember("capacity") && entry["capacity"].isNumeric()) {
+        if (!forceRecalculate && entry.isMember("capacity") && entry["capacity"].isNumeric()) {
           capacity = static_cast<size_t>(entry["capacity"].asUInt());
+          _SS_DIAGPRINT("MediaPaths(): Using existing capacity " << capacity << " for " << filepath);
         } else {
-          // Execute wcap to get capacity
-          capacity = executeWcap(wcapPath, filepath);
+          // Execute wcap to get capacity - now with stored wcapPath
+          capacity = executeWcap(filepath);
           if (capacity > 0) {
             entry["capacity"] = static_cast<Json::UInt>(capacity);
             needsUpdate = true;
-            _SS_DIAGPRINT("MediaPaths(): Added capacity " << capacity << " for " << filepath);
+            _SS_DIAGPRINT("MediaPaths(): " << (forceRecalculate ? "Recalculated" : "Added") << 
+                         " capacity " << capacity << " for " << filepath);
           } else {
             _SS_DIAGPRINT("MediaPaths(): Failed to get capacity for " << filepath);
             continue;
@@ -276,8 +279,20 @@ MediaPaths::getRandom ()
   return nullptr;
 }
 
-size_t MediaPaths::executeWcap(const std::string& wcapPath, const std::string& filepath) {
-    std::string command = wcapPath + " \"" + filepath + "\"";
+size_t MediaPaths::executeWcap(const std::string& filepath, const std::string& commonArgs) {
+    if (_wcapPath.empty()) {
+        _SS_DIAGPRINT("MediaPaths::executeWcap(): wcap path not set");
+        return 0;
+    }
+
+    // Build command with common args if provided
+    std::string command = _wcapPath;
+    if (!commonArgs.empty()) {
+        command += " " + commonArgs;
+    }
+    command += " \"" + filepath + "\"";
+
+    _SS_DIAGPRINT("MediaPaths::executeWcap(): Executing: " << command);
 
     FILE* pipe = popen(command.c_str(), "r");
     if (!pipe) {
@@ -895,7 +910,9 @@ CLICodec::CLICodec (Json::Value jRoot):
   _mimeType (""),
   _encodingTime (0),
   _secret (0),
-  _lastMediaPtr (nullptr)
+  _lastMediaPtr (nullptr),
+  _overrideCommonArgs(""),
+  _hasCommonArgsOverride(false)
 {
   do {        // "Do once" loop to expedite graceful error exit
 
@@ -1076,7 +1093,7 @@ CLICodec::CLICodec (Json::Value jRoot):
 
     // "media":{"capacities", "maximum"}
 
-    auto wcapPath = _getJSONString (jMedia, _CODEC_WCAP_PATH_KEY);
+    auto wcapPath = DirFilename (_getJSONString (jMedia, _CODEC_WCAP_PATH_KEY));
     _SS_DIAGPRINT ("Wcap Path: " + wcapPath + "\n")
     auto capacitiesPath = DirFilename (_getJSONString (jMedia, _CODEC_CAPACITY_KEY));
     auto maxCapacity    = static_cast <size_t> (_getJSONInt (jMedia, _CODEC_MAX_CAP_KEY, 0));
@@ -1120,7 +1137,7 @@ CLICodec::CLICodec (Json::Value jRoot):
       _isGood       = _encodingTime != 0.0;
 
       if (!_isGood) {
-        _SS_DIAGPRINT ("CLICodec::CLICodec () ERROR: missing \"encodingTime\".");
+        _SS_DIAGPRINT ("CLICodec::CLLICodec () ERROR: missing \"encodingTime\".");
 
         break;
       }
@@ -1172,9 +1189,15 @@ CLICodec::encode (const void *message, size_t message_length, void **pMsgOut, si
 
     _lastMediaPtr = nullptr;
 
-    // encode!
+    // Use override arguments if available, otherwise use defaults from JSON
+    std::string commonArgs = _hasCommonArgsOverride ? _overrideCommonArgs : _commonArgs;
+    std::string encodeArgs = _encodeArgs;
+    
+    _SS_DIAGPRINT("CLICodec::encode() - Using common args: " << commonArgs);
+    _SS_DIAGPRINT("CLICodec::encode() - Using encode args: " << encodeArgs);
 
-    StringList  sList {_commonArgs, _encodeArgs};
+    // encode!
+    StringList  sList {commonArgs, encodeArgs};
     ReplaceMap  rMap  {{_CODEC_SECRET_SYM,     std::to_string (_secret)},
                        {_CODEC_COVER_FILE_SYM, mediaPtr->path ()}};
     auto        rList = _replaceStrings (sList, rMap);
@@ -1210,7 +1233,12 @@ CLICodec::decode (const void *pMsgIn, size_t nMsgIn, void **pMsgOut, size_t *nMs
 {
   _SS_DIAGPRINT ("CLICodec::decode (): " << nMsgIn);
 
-  StringList  sList {_commonArgs, _decodeArgs};
+  // Use override common arguments if available, otherwise use defaults from JSON
+  std::string commonArgs = _hasCommonArgsOverride ? _overrideCommonArgs : _commonArgs;
+  
+  _SS_DIAGPRINT("CLICodec::decode() - Using common args: " << commonArgs);
+
+  StringList  sList {commonArgs, _decodeArgs};
   ReplaceMap  rMap  {{_CODEC_SECRET_SYM, std::to_string (_secret)}};
   auto        rList = _replaceStrings (sList, rMap);
   std::string _aArg = _isAndroid ? _codecPath : "";
@@ -1282,6 +1310,108 @@ CLICodec::setSecret (uint32_t secret)
   _secret = secret;
 }
 
+  void
+CLICodec::setArgumentOverrides(const std::string& commonArgs,
+                                  bool hasCommonOverride) {
+    _overrideCommonArgs = commonArgs;
+    _hasCommonArgsOverride = hasCommonOverride;
+    
+    _SS_DIAGPRINT("CLICodec::setArgumentOverrides() - Common override: " 
+                  << (_hasCommonArgsOverride ? "YES (" + _overrideCommonArgs + ")" : "NO"));
+}
+
+size_t CLICodec::getMinimumCapacity() const {
+    if (_mediaPaths == nullptr || !_mediaPaths->isGood()) {
+        return 0;
+    }
+    return _mediaPaths->getMinCapacity();
+}
+
+void CLICodec::recalculateCapacities(const std::string& commonArgs) {
+    if (_mediaPaths != nullptr) {
+        _SS_DIAGPRINT("CLICodec::recalculateCapacities() - Recalculating with common args: " << commonArgs);
+        _mediaPaths->recalculateCapacities(commonArgs);
+    }
+}
+void MediaPaths::recalculateCapacities(const std::string& commonArgs) {
+    _SS_DIAGPRINT("MediaPaths::recalculateCapacities() - Starting recalculation with common args: " << commonArgs);
+    
+    // Clear current media paths
+    cleanUp();
+    
+    // Reset statistics
+    _minCapacity = 0;
+    _maxCapacity = 0;
+    
+    // Reload with force recalculation using stored paths
+    // Create a temporary MediaPaths object with force recalculation
+    if (fileExists(_jsonFilePath)) {
+        std::ifstream inFile(_jsonFilePath);
+        
+        if (inFile.is_open()) {
+            Json::Value root;
+            Json::Reader reader;
+            
+            if (reader.parse(inFile, root) && root.isArray()) {
+                inFile.close();
+                
+                bool needsUpdate = false;
+                double _sumCapacity = 0.0;
+                double _sumSqCapacity = 0.0;
+                double _numLines = 0.0;
+                
+                // Process each entry and recalculate capacities
+                for (Json::Value::ArrayIndex i = 0; i < root.size(); ++i) {
+                    Json::Value& entry = root[i];
+                    
+                    if (entry.isObject() && entry.isMember("filepath") && entry["filepath"].isString()) {
+                        std::string filepath = entry["filepath"].asString();
+                        
+                        if (!fileExists(filepath)) {
+                            filepath = CLICodec::DirFilename(filepath);
+                        }
+                        
+                        if (fileExists(filepath)) {
+                          // Force recalculation with new common args
+                          size_t capacity = executeWcap(filepath, commonArgs);
+                          if (capacity > 0) {
+                            entry["capacity"] = static_cast<Json::UInt>(capacity);
+                            needsUpdate = true;
+                            
+                            ++_numLines;
+                            _sumCapacity += capacity;
+                            _sumSqCapacity += static_cast<double>(capacity * capacity);
+                            
+                            if (_minCapacity == 0 || capacity < _minCapacity) {
+                                _minCapacity = capacity;
+                            }
+                            if (capacity > _maxCapacity) {
+                                _maxCapacity = capacity;
+                            }
+                            
+                            _activeMediaPaths.push_back(new MediaPath(filepath, capacity));
+                          }
+                        }
+                    }
+                }
+                
+                // Update statistics
+                if (_numLines > 0.0) {
+                    _avgCapacity = _sumCapacity / _numLines;
+                    _stdDevCapacity = std::sqrt(_sumSqCapacity / _numLines - _avgCapacity * _avgCapacity);
+                }
+                
+                // Write back updated JSON
+                if (needsUpdate) {
+                    writeJsonFile(_jsonFilePath, root);
+                }
+                
+                _SS_DIAGPRINT("MediaPaths::recalculateCapacities() - Recalculation complete. New min/max: " 
+                             << _minCapacity << "/" << _maxCapacity);
+            }
+        }
+    }
+}
 #if defined (_TEST_MAIN_)
 
   int
