@@ -52,7 +52,7 @@ PluginTA2SRICLIEncoding::PluginTA2SRICLIEncoding(IEncodingSdk *_sdk, const Plugi
 
     // Request user input for argument overrides
     commonArgsHandle = sdk->requestPluginUserInput(
-        "commonArgs",
+        "destiniCommonArgs",
         "Enter common arguments override (or leave empty to use defaults from codec.json):",
         false  // Not required - can be empty
     ).handle;
