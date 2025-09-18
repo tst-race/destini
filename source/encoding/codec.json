@@ -8,6 +8,7 @@
     },
 
     "media": {
+        "wcap_path": "bin/wcap",
         "capacities": "jpeg-covers/capacities.txt",
         "maximum": 3000
     },

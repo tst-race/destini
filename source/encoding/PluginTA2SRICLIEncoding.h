@@ -33,6 +33,19 @@ private:
     IEncodingSdk       *sdk;
     const PluginConfig &pluginConfig;
     CLICodec           *cliCodec;
+
+    // Add these private members to store override arguments and handles
+    std::string overrideCommonArgs;
+    bool hasCommonArgsOverride = false;
+
+    // RaceHandles for user input requests
+    RaceHandle commonArgsHandle = NULL_RACE_HANDLE;
+
+    // Track if inputs have been received
+    bool commonArgsReceived = false;
+
+    // Add method to get minimum capacity
+    size_t getMinimumCapacity() const;
 };
 
 #endif

@@ -15,7 +15,14 @@
 const char *PluginTA2SRICLIEncoding::name = "SRICLIEncoding";
 
 
-PluginTA2SRICLIEncoding::PluginTA2SRICLIEncoding(IEncodingSdk *_sdk, const PluginConfig &_pluginConfig) : sdk(_sdk), pluginConfig(_pluginConfig) {
+PluginTA2SRICLIEncoding::PluginTA2SRICLIEncoding(IEncodingSdk *_sdk, const PluginConfig &_pluginConfig) : 
+    sdk(_sdk), 
+    pluginConfig(_pluginConfig),
+    overrideCommonArgs(""),
+    hasCommonArgsOverride(false),
+    commonArgsHandle(NULL_RACE_HANDLE),
+    commonArgsReceived(false) {
+    
     if (this->sdk == nullptr) {
         throw std::runtime_error ("PluginTA2SRICLIEncoding: sdk parameter is NULL");
     }
@@ -23,24 +30,16 @@ PluginTA2SRICLIEncoding::PluginTA2SRICLIEncoding(IEncodingSdk *_sdk, const Plugi
     this->cliCodec = nullptr;
     CLICodec::SetDirname (this->pluginConfig.pluginDirectory);
 
-
     // Get codec definition
-
-    // auto codecJSONPath = CLICodec::DirFilename ("codec.json");
-    // Horrible hack:
     logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: etcDirectory " + _pluginConfig.etcDirectory);
     logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: loggingDirectory " + _pluginConfig.loggingDirectory);
     logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: auxDataDirectory " + _pluginConfig.auxDataDirectory);
     logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: tmpDirectory " + _pluginConfig.tmpDirectory);
     logDebug ("PluginTA2SRICLIEncoding:: PluginConfig: pluginDirectory " + _pluginConfig.pluginDirectory);
-    // auto codecJSONPath = CLICodec::DirFilename("/etc/race/plugins/unix/x86_64/PluginTA2SRIDecomposed/codec.json");
+    
     CLICodec::SetDirname(pluginConfig.pluginDirectory);
     auto codecJSONPath = CLICodec::DirFilename("codec.json");
     auto codecJSON     = codecJSONPath.c_str ();
-
-    // The codec.json file contains info about how to do the encoding
-    // decoding, but is wired for JPEG.  What's the best way to extend
-    // this to video?  We could add entries to codec.json
 
     if (fileExists (codecJSON)) {
          std::ifstream fJSON (codecJSON);
@@ -51,12 +50,59 @@ PluginTA2SRICLIEncoding::PluginTA2SRICLIEncoding(IEncodingSdk *_sdk, const Plugi
     else
         throw std::runtime_error ("PluginTA2SRICLIEncoding: JSON (" + codecJSONPath + ") not found");
 
-    sdk->updateState(COMPONENT_STATE_STARTED);
+    // Request user input for argument overrides
+    commonArgsHandle = sdk->requestPluginUserInput(
+        "destiniCommonArgs",
+        "Enter common arguments override (or leave empty to use defaults from codec.json):",
+        false  // Not required - can be empty
+    ).handle;
+
+    logDebug("PluginTA2SRICLIEncoding: Requested user input for argument overrides");
+    logDebug("PluginTA2SRICLIEncoding: Common args handle: " + std::to_string(commonArgsHandle));
 }
 
 ComponentStatus PluginTA2SRICLIEncoding::onUserInputReceived(RaceHandle handle, bool answered,
                                                              const std::string &response) {
     TRACE_SRI_METHOD(handle, answered, response);
+
+    logDebug("PluginTA2SRICLIEncoding: Received user input - Handle: " + std::to_string(handle) + 
+             ", Answered: " + (answered ? "true" : "false") + 
+             ", Response length: " + std::to_string(response.length()));
+
+    if (handle == commonArgsHandle) {
+        commonArgsReceived = true;
+        
+        if (answered && !response.empty()) {
+            overrideCommonArgs = response;
+            hasCommonArgsOverride = true;
+            logInfo("PluginTA2SRICLIEncoding: Common args override set to: '" + response + "'");
+            
+            // Since common args changed, we need to recalculate all capacities
+            if (cliCodec != nullptr) {
+                logInfo("PluginTA2SRICLIEncoding: Common args overridden, triggering capacity recalculation");
+                cliCodec->recalculateCapacities(overrideCommonArgs);
+            }
+        } else {
+            hasCommonArgsOverride = false;
+            logDebug("PluginTA2SRICLIEncoding: No common args override provided, will use codec.json defaults");
+        }
+        
+        // Pass the override arguments to the codec
+        if (cliCodec != nullptr) {
+            cliCodec->setArgumentOverrides(
+                hasCommonArgsOverride ? overrideCommonArgs : "",
+                hasCommonArgsOverride
+            );
+            logDebug("PluginTA2SRICLIEncoding: All user inputs received, updated codec with overrides");
+        }
+        
+        // Update component state to indicate we're ready
+        sdk->updateState(COMPONENT_STATE_STARTED);
+        
+    } else {
+        logWarning("PluginTA2SRICLIEncoding: Received unexpected handle: " + std::to_string(handle));
+        return COMPONENT_ERROR;
+    }
 
     return COMPONENT_OK;
 }
@@ -67,12 +113,31 @@ EncodingProperties PluginTA2SRICLIEncoding::getEncodingProperties() {
     return {cliCodec->encodingTime (), cliCodec->mimeType ()};
 }
 
-SpecificEncodingProperties PluginTA2SRICLIEncoding::getEncodingPropertiesForParameters(
-    const EncodingParameters & /* params */) {
-    TRACE_SRI_METHOD();
+SpecificEncodingProperties PluginTA2SRICLIEncoding::getEncodingPropertiesForParameters(const EncodingParameters &params) {
+    TRACE_SRI_METHOD(params.type, params.linkId);
+    
+    // Get the actual minimum capacity from MediaPaths instead of hardcoded 3000
+    size_t capacity = getMinimumCapacity();
+    
+    logDebug("PluginTA2SRICLIEncoding::getEncodingPropertiesForParameters: Using capacity " + std::to_string(capacity));
+    
+    return {static_cast <int32_t>(capacity)};
+}
 
-    // {static_cast <int32_t> (cliCodec->minCapacity ())};
-    return {static_cast <int32_t> (3000)};
+size_t PluginTA2SRICLIEncoding::getMinimumCapacity() const {
+    if (cliCodec == nullptr) {
+        logWarning("PluginTA2SRICLIEncoding::getMinimumCapacity: cliCodec is null, returning default 3000");
+        return 3000;
+    }
+    
+    size_t minCapacity = cliCodec->getMinimumCapacity();
+    if (minCapacity == 0) {
+        logWarning("PluginTA2SRICLIEncoding::getMinimumCapacity: No valid capacities found, returning default 3000");
+        return 3000;
+    }
+    
+    logDebug("PluginTA2SRICLIEncoding::getMinimumCapacity: returning " + std::to_string(minCapacity));
+    return minCapacity;
 }
 
 ComponentStatus PluginTA2SRICLIEncoding::encodeBytes(RaceHandle handle,
@@ -84,7 +149,7 @@ ComponentStatus PluginTA2SRICLIEncoding::encodeBytes(RaceHandle handle,
     auto   *pMsgIn = bytes.data ();
     size_t  nMsgIn = bytes.size ();
 
-    logInfo ("PluginTA2SRICLIEncoding::encodeBytes, nMsgIn: " + std::to_string (nMsgIn));
+    logDebug ("PluginTA2SRICLIEncoding::encodeBytes, nMsgIn: " + std::to_string (nMsgIn));
 
     if (nMsgIn == 0) {
     	sdk->onBytesEncoded (handle, bytes, ENCODE_OK);

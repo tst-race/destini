@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <event2/event.h>
+
 #ifdef __ANDROID__
 #include <json/json.h>
 #else
@@ -39,24 +41,79 @@ class MediaPaths
   double                    _avgCapacity;
   double                    _stdDevCapacity;
 
+  std::string _wcapPath;  // Store the wcap executable path
+  std::string _jsonFilePath;  // Store JSON file path for recalculation
+
  protected:
-  explicit     MediaPaths (const std::string &mediaCapacities, size_t maxCapacity = 0);
+  explicit     MediaPaths (const std::string &wcapPath, const std::string &mediaCapacities, size_t maxCapacity = 0, bool forceRecalculation = false);
   void         cleanUp ();
   friend class CLICodec;
 
  public:
   unsigned int size () {return _activeMediaPaths.size ();};
   MediaPathPtr getRandom ();
+  size_t executeWcap(const std::string& wcapPath, const std::string& filepath);
+  void writeJsonFile(const std::string& filename, const Json::Value& root);
   size_t       minCapacity    () {return _minCapacity;}
   size_t       maxCapacity    () {return _maxCapacity;}
   double       avgCapacity    () {return _avgCapacity;}
   double       stdDevCapacity () {return _stdDevCapacity;}
 
   bool isGood () {return size () /* > 0 */;};
+
+  // Add methods for capacity management
+  size_t getMinCapacity() const { return _minCapacity; }
+  void recalculateCapacities(const std::string& commonArgs);
 };
 
 typedef MediaPaths *MediaPathsPtr;
 
+class _RunCodec
+{
+ private:
+  static struct event *_freeEvent (struct event *pEvent);
+
+  static void EventOutCB   (evutil_socket_t fd, short what, void *arg);
+  static void EventInOutCB (evutil_socket_t fd, short what, void *arg);
+  static void EventInErrCB (evutil_socket_t fd, short what, void *arg);
+  static void _EventInFn   (_RunCodec *runCodec, evutil_socket_t fd,
+                            char **pIn, size_t *nIn, size_t *nextIn, size_t *capIn);
+  const char *_pMsgIn;
+  size_t      _nMsgIn;
+
+  char      **_pMsgOut;
+  size_t     *_nMsgOut;
+  size_t      _nextOut;
+  size_t      _capOut;
+
+  char       *_pError;
+  size_t      _nError;
+  size_t      _nextErr;
+  size_t      _capError;
+
+  int         _rwepipe[3];
+  int         _pid;
+
+  int         _status;
+  int         _pidStatus;
+
+  struct event *_evIn;
+  struct event *_evOut;
+  struct event *_evErr;
+
+  void _freeEVIn ();
+  void _endLibevent ();
+
+ public:
+  explicit _RunCodec ();
+  ~_RunCodec ();
+
+  int run (std::string codecPath, std::string args,
+           const void  *pMsgIn,  size_t  nMsgIn,
+           void        *pMsgOut, size_t *nMsgOut);
+
+  std::string error ();
+};
 
 class CLICodec
 {
@@ -80,6 +137,12 @@ class CLICodec
 
   bool          _isGood;
   bool          _isAndroid;
+
+  // Add new members for argument overrides
+  std::string _overrideCommonArgs;
+  std::string _overrideEncodeArgs;
+  bool _hasCommonArgsOverride;
+  bool _hasEncodeArgsOverride;
 
   int           _runCodec (std::string args,
                            void  *pMsgIn,  size_t  nMsgIn,
@@ -125,6 +188,14 @@ class CLICodec
   void setSecret (const std::string &host1, const std::string &host2);
   void setSecret (uint32_t ip1, uint32_t ip2);
   void setSecret (uint32_t secret);
+
+  // Add new method for setting argument overrides
+  void setArgumentOverrides(const std::string& commonArgs, 
+                            bool hasCommonOverride);
+
+  // Add methods for capacity management
+  size_t getMinimumCapacity() const;
+  void recalculateCapacities(const std::string& commonArgs);
 
   bool isGood () {return _isGood;};
 };

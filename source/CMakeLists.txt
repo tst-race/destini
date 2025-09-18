@@ -37,13 +37,12 @@
     ## Default to Linux
     find_package(CURL)
     find_package(Boost COMPONENTS filesystem system REQUIRED) 
-    find_library(LIB_XML2 xml2)
+    # find_library(LIB_XML2 xml2)
     find_library(LIB_CPPREST cpprest)
     find_library(LIB_CRYPTO crypto)
     find_library(LIB_SSL ssl)
     find_library(LIB_JSONCPP jsoncpp)
     find_library(LIB_EVENT event)
-    find_library(LIB_FLICKCURL flickcurl)
     # include_directories(${CURL_INCLUDE_DIR} ../racesdk/common/include ../racesdk/core/include )
     # if ("${TARGET_ARCHITECTURE}" STREQUAL "LINUX_arm64-v8a")
     # 	    include_directories(${CURL_INCLUDE_DIR} /linux/arm64-v8a/include )
@@ -64,7 +63,7 @@
         ${LIB_JSONCPP}
         ${LIB_EVENT}
 	${LIB_FLICKCURL}
-	${LIB_XML2}
+	# ${LIB_XML2}
     )
     message( "LIB_FLICKCURL: ${LIB_FLICKCURL}" )
 
