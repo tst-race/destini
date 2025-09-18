@@ -113,11 +113,6 @@ fi
 export CC=clang
 export CXX=clang++
 
-#if [ -z "${APP_ROOT}" ] ; then
-#    formatlog "ERROR" "Script should be run in a race-sdk image (or called through build_artifacts_in_docker_image.sh). Exiting"
-#    exit 1
-#fi
-
 ###
 # Main Execution
 ###
@@ -131,7 +126,6 @@ fi
 apt-get -y update
 apt-get -y install libboost-all-dev
 apt-get -y install libcpprest-dev
-# apt-get -y install libxml2-dev
 apt-get -y install libjsoncpp-dev
 apt-get -y install libjpeg62-dev
 apt-get -y install libevent-dev
@@ -141,11 +135,6 @@ apt-get -y install parallel
 
 pip install pillow
 pip install psutil
-
-# pushd /usr/local/include
-# ls /usr/include
-# ln -s /usr/include/libxml2/libxml
-# popd
 
 formatlog "INFO" "Cleaning plugin/artifacts Before Building Artifacts"
 bash ${BASE_DIR}/clean_artifacts.sh
