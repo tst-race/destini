@@ -9,7 +9,7 @@
 
     "media": {
         "wcap_path": "bin/wcap",
-        "capacities": "jpeg-covers/capacities.txt",
+        "capacities": "jpeg-covers/capacities.json",
         "maximum": 3000
     },
 
